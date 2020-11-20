@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#include <queuedef.h>
+#include <concurrent/queuedef.h>
 
 typedef struct mpmc_q_s mpmc_ring_queue; /* object type of queue instance */
 
@@ -37,7 +37,7 @@ qerr_t mpmc_ring_queue_destroy(mpmc_ring_queue *q);
 /* Delete an instance of a queue (call mpmc_ring_queue_destroy) and free all items before.
  * q : Queue instance handle.
  * Returns QERR_OK on success, or other QERR_* value on error. */
-qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q);
+qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q, free_func f);
 
 /* Add a message to the queue.
  * q : Queue instance handle.
@@ -63,10 +63,15 @@ int mpmc_ring_queue_full(mpmc_ring_queue *q);
  * q : Queue instance handle. */
 size_t mpmc_ring_queue_size(mpmc_ring_queue *q);
 
-/* Return queue free len. Not full consistent.
+/* Return queue free length. Not full consistent.
  * Also can return 0 if queue is full or capacity if queue is empthy due to paralell enqueue/dequeue.
  * q : Queue instance handle. */
 size_t mpmc_ring_queue_free_relaxed(mpmc_ring_queue *q);
+
+/* Return queue length. Not full consistent.
+ * Also can return 0 if queue is full or capacity if queue is empthy due to paralell enqueue/dequeue.
+ * q : Queue instance handle. */
+size_t mpmc_ring_queue_len_relaxed(mpmc_ring_queue *q);
 
 #ifdef __cplusplus
 }

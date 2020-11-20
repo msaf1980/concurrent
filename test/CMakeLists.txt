@@ -1,11 +1,6 @@
 # Scan source dir for standart source files and exclude main.cpp
 
-set(TEST_INCLUDES)
-foreach(dir IN LISTS DIRS_INCLUDES SUB_DIRS)
-    list(APPEND TEST_INCLUDES ../${dir})
-endforeach()
-
-include_directories(${TEST_INCLUDES})
+include_directories(../include ../src)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -36,5 +31,5 @@ foreach(testFile ${testFiles})
              COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_${test})
 endforeach(testFile)
 
-add_executable(bench_queue "queue_bench.c" "queue.c" ${REQUIRED_SOURCES})
+add_executable(bench_queue "queue_bench.c" ${REQUIRED_SOURCES})
 target_link_libraries(bench_queue ${TEST_LIBRARIES})

@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #include "mpmc_ring_queue_internal.h"
-#include <mpmc_ring_queue.h>
+#include <concurrent/mpmc_ring_queue.h>
 
 #define QERR(p_qerr, qerr_n)                                                   \
     do {                                                                       \
@@ -69,10 +69,13 @@ qerr_t mpmc_ring_queue_destroy(mpmc_ring_queue *q) {
     return QERR_OK;
 } /* mpmc_ring_queue_destroy */
 
-qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q) {
+qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q, free_func f) {
     void *p;
+    if (f == NULL) {
+        f = free;
+    }
     while ((p = mpmc_ring_queue_dequeue(q)) != NULL) {
-        free((char *) p);
+        f((void *) p);
     }
 
     return mpmc_ring_queue_destroy(q);
@@ -166,4 +169,8 @@ size_t mpmc_ring_queue_free_relaxed(mpmc_ring_queue *q) {
         }
     }
     return mpmc_ring_queue_size(q) - (put_pos - get_pos);
+}
+
+size_t mpmc_ring_queue_len_relaxed(mpmc_ring_queue *q) {
+    return mpmc_ring_queue_size(q) - mpmc_ring_queue_free_relaxed(q);
 }

@@ -10,9 +10,9 @@
 #include "pthread_barrier.h"
 #endif
 
-#include "queue.h"
+#include <concurrent/queue.h>
 
-#include <arch.h>
+#include <concurrent/arch.h>
 
 #define CTEST_MAIN
 #define CTEST_SEGFAULT
