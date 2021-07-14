@@ -20,16 +20,40 @@ endif()
 set(TEST_LIBRARIES concurrent_static Threads::Threads)
 
 # Build tests
-file(GLOB testFiles *_test.c)
-foreach(testFile ${testFiles})
-    file(RELATIVE_PATH test_file ${CMAKE_CURRENT_SOURCE_DIR} ${testFile})
-    string(REGEX REPLACE "^([0-9a-zA-Z_\\-]+)_test\.c.*$" "\\1" test
-                         "${test_file}")
-    add_executable(test_${test} ${test_file} ${REQUIRED_SOURCES})
-    target_link_libraries(test_${test} ${TEST_LIBRARIES})
-    add_test(NAME test_${test}
-             COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_${test})
-endforeach(testFile)
+add_executable(test_mpmc_ring_queue mpmc_ring_queue_test.c)
+target_link_libraries(test_mpmc_ring_queue ${TEST_LIBRARIES})
+add_test(
+    NAME test_mpmc_ring_queue
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue
+)
 
-add_executable(bench_queue "queue_bench.c" ${REQUIRED_SOURCES})
+add_executable(test_mpmc_ring_queue_scale mpmc_ring_queue_scale_test.c)
+target_link_libraries(test_mpmc_ring_queue_scale ${TEST_LIBRARIES})
+add_test(
+    NAME test_mpmc_ring_queue_scale
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue_scale
+)
+
+add_executable(test_queuedef queuedef_test.c)
+target_link_libraries(test_queuedef ${TEST_LIBRARIES})
+add_test(
+    NAME test_queuedef
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_queuedef
+)
+
+add_executable(test_spinlock spinlock_test.c)
+target_link_libraries(test_spinlock ${TEST_LIBRARIES})
+add_test(
+    NAME test_spinlock
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock
+)
+
+add_executable(test_spinlock_scale spinlock_scale_test.c)
+target_link_libraries(test_spinlock_scale ${TEST_LIBRARIES})
+add_test(
+    NAME test_spinlock_scale
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
+)
+
+add_executable(bench_queue queue_bench.c ${REQUIRED_SOURCES})
 target_link_libraries(bench_queue ${TEST_LIBRARIES})

@@ -1,8 +1,9 @@
-set(SOURCES)
-set(LIBRARIES)
-
-# Scan dir for standart source files
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} CONCURRENT_SOURCES)
+set(
+    CONCURRENT_SOURCES
+    mpmc_ring_queue.c
+    queue.c
+    queuedef.c
+)
 
 if(BUILD_SHARED_LIBS)
     add_library(concurrent SHARED ${CONCURRENT_SOURCES})
