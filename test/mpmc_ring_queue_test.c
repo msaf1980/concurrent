@@ -446,7 +446,7 @@ void mpmc_ring_queue_enqueue_dequeue(size_t q_size, size_t loops,
         test_data.deq_sum != test_data.enq_sum) {
         mpmc_ring_queue_dump(test_data.q);
         mpmc_ring_queue_destroy(test_data.q);
-        ASSERT_FORMAT(
+        CTEST_ERR(
             "enqueue/dequeue cnt = %lu/%lu, enqueue/dequeue sum = %lu/%lu",
             (unsigned long) test_data.enq_cnt,
             (unsigned long) test_data.deq_cnt,

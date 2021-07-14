@@ -155,7 +155,7 @@ void queue_enqueue_dequeue(size_t q_size, size_t loops, unsigned writers,
     if (test_data.deq_cnt != test_data.enq_cnt ||
         test_data.deq_sum != test_data.enq_sum) {
         queue_destroy(test_data.q);
-        ASSERT_FORMAT(
+        CTEST_ERR(
             "enqueue/dequeue cnt = %lu/%lu, enqueue/dequeue sum = %lu/%lu",
             (unsigned long) test_data.enq_cnt,
             (unsigned long) test_data.deq_cnt,

@@ -1,4 +1,4 @@
-/* Copyright 2011-2020 Bas van den Berg
+/* Copyright 2011-2021 Bas van den Berg
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 #ifndef CTEST_H
 #define CTEST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __GNUC__
 #define CTEST_IMPL_FORMAT_PRINTF(a, b) __attribute__ ((format(printf, a, b)))
 #else
@@ -25,8 +29,15 @@
 #include <inttypes.h> /* intmax_t, uintmax_t, PRI* */
 #include <stddef.h> /* size_t */
 
+typedef void (*ctest_nullary_run_func)(void);
+typedef void (*ctest_unary_run_func)(void*);
 typedef void (*ctest_setup_func)(void*);
 typedef void (*ctest_teardown_func)(void*);
+
+union ctest_run_func_union {
+    ctest_nullary_run_func nullary;
+    ctest_unary_run_func unary;
+};
 
 #define CTEST_IMPL_PRAGMA(x) _Pragma (#x)
 
@@ -50,12 +61,10 @@ typedef void (*ctest_teardown_func)(void*);
 #define CTEST_IMPL_DIAG_POP()
 #endif
 
-CTEST_IMPL_DIAG_PUSH_IGNORED(strict-prototypes)
-
 struct ctest {
-    const char* ssname;  /* suite name */
-    const char* ttname;  /* test name */
-    void (*run)();
+    const char* ssname;  // suite name
+    const char* ttname;  // test name
+    union ctest_run_func_union run;
 
     void* data;
     ctest_setup_func* setup;
@@ -66,8 +75,6 @@ struct ctest {
     unsigned int magic;
 };
 
-CTEST_IMPL_DIAG_POP()
-
 #define CTEST_IMPL_NAME(name) ctest_##name
 #define CTEST_IMPL_FNAME(sname, tname) CTEST_IMPL_NAME(sname##_##tname##_run)
 #define CTEST_IMPL_TNAME(sname, tname) CTEST_IMPL_NAME(sname##_##tname)
@@ -75,8 +82,10 @@ CTEST_IMPL_DIAG_POP()
 #define CTEST_IMPL_DATA_TNAME(sname, tname) CTEST_IMPL_NAME(sname##_##tname##_data)
 #define CTEST_IMPL_SETUP_FNAME(sname) CTEST_IMPL_NAME(sname##_setup)
 #define CTEST_IMPL_SETUP_FPNAME(sname) CTEST_IMPL_NAME(sname##_setup_ptr)
+#define CTEST_IMPL_SETUP_TPNAME(sname, tname) CTEST_IMPL_NAME(sname##_##tname##_setup_ptr)
 #define CTEST_IMPL_TEARDOWN_FNAME(sname) CTEST_IMPL_NAME(sname##_teardown)
 #define CTEST_IMPL_TEARDOWN_FPNAME(sname) CTEST_IMPL_NAME(sname##_teardown_ptr)
+#define CTEST_IMPL_TEARDOWN_TPNAME(sname, tname) CTEST_IMPL_NAME(sname##_##tname##_teardown_ptr)
 
 #define CTEST_IMPL_MAGIC (0xdeadbeef)
 #ifdef __APPLE__
@@ -87,14 +96,43 @@ CTEST_IMPL_DIAG_POP()
 
 #define CTEST_IMPL_STRUCT(sname, tname, tskip, tdata, tsetup, tteardown) \
     static struct ctest CTEST_IMPL_TNAME(sname, tname) CTEST_IMPL_SECTION = { \
-        .ssname=#sname, \
-        .ttname=#tname, \
-        .run = CTEST_IMPL_FNAME(sname, tname), \
-        .data = tdata, \
-        .setup = (ctest_setup_func*) tsetup, \
-        .teardown = (ctest_teardown_func*) tteardown, \
-        .skip = tskip, \
-        .magic = CTEST_IMPL_MAGIC }
+        #sname, \
+        #tname, \
+        { (ctest_nullary_run_func) CTEST_IMPL_FNAME(sname, tname) }, \
+        tdata, \
+        (ctest_setup_func*) tsetup, \
+        (ctest_teardown_func*) tteardown, \
+        tskip, \
+        CTEST_IMPL_MAGIC, \
+    }
+
+#ifdef __cplusplus
+
+#define CTEST_SETUP(sname) \
+    template <> void CTEST_IMPL_SETUP_FNAME(sname)(struct CTEST_IMPL_DATA_SNAME(sname)* data)
+
+#define CTEST_TEARDOWN(sname) \
+    template <> void CTEST_IMPL_TEARDOWN_FNAME(sname)(struct CTEST_IMPL_DATA_SNAME(sname)* data)
+
+#define CTEST_DATA(sname) \
+    template <typename T> void CTEST_IMPL_SETUP_FNAME(sname)(T* data) { } \
+    template <typename T> void CTEST_IMPL_TEARDOWN_FNAME(sname)(T* data) { } \
+    struct CTEST_IMPL_DATA_SNAME(sname)
+
+#define CTEST_IMPL_CTEST(sname, tname, tskip) \
+    static void CTEST_IMPL_FNAME(sname, tname)(void); \
+    CTEST_IMPL_STRUCT(sname, tname, tskip, NULL, NULL, NULL); \
+    static void CTEST_IMPL_FNAME(sname, tname)(void)
+
+#define CTEST_IMPL_CTEST2(sname, tname, tskip) \
+    static struct CTEST_IMPL_DATA_SNAME(sname) CTEST_IMPL_DATA_TNAME(sname, tname); \
+    static void CTEST_IMPL_FNAME(sname, tname)(struct CTEST_IMPL_DATA_SNAME(sname)* data); \
+    static void (*CTEST_IMPL_SETUP_TPNAME(sname, tname))(struct CTEST_IMPL_DATA_SNAME(sname)*) = &CTEST_IMPL_SETUP_FNAME(sname)<struct CTEST_IMPL_DATA_SNAME(sname)>; \
+    static void (*CTEST_IMPL_TEARDOWN_TPNAME(sname, tname))(struct CTEST_IMPL_DATA_SNAME(sname)*) = &CTEST_IMPL_TEARDOWN_FNAME(sname)<struct CTEST_IMPL_DATA_SNAME(sname)>; \
+    CTEST_IMPL_STRUCT(sname, tname, tskip, &CTEST_IMPL_DATA_TNAME(sname, tname), &CTEST_IMPL_SETUP_TPNAME(sname, tname), &CTEST_IMPL_TEARDOWN_TPNAME(sname, tname)); \
+    static void CTEST_IMPL_FNAME(sname, tname)(struct CTEST_IMPL_DATA_SNAME(sname)* data)
+
+#else
 
 #define CTEST_SETUP(sname) \
     static void CTEST_IMPL_SETUP_FNAME(sname)(struct CTEST_IMPL_DATA_SNAME(sname)* data); \
@@ -123,9 +161,12 @@ CTEST_IMPL_DIAG_POP()
     CTEST_IMPL_STRUCT(sname, tname, tskip, &CTEST_IMPL_DATA_TNAME(sname, tname), &CTEST_IMPL_SETUP_FPNAME(sname), &CTEST_IMPL_TEARDOWN_FPNAME(sname)); \
     static void CTEST_IMPL_FNAME(sname, tname)(struct CTEST_IMPL_DATA_SNAME(sname)* data)
 
+#endif
 
 void CTEST_LOG(const char* fmt, ...) CTEST_IMPL_FORMAT_PRINTF(1, 2);
-void CTEST_ERR(const char* fmt, ...) CTEST_IMPL_FORMAT_PRINTF(1, 2);  /* doesn't return */
+void CTEST_ERR(const char* fmt, ...) CTEST_IMPL_FORMAT_PRINTF(1, 2);  // doesn't return
+
+char *CTEST_DESCRIPTION_FORMAT(char *buf, size_t n, const char* const fmt, ...);
 
 #define CTEST(sname, tname) CTEST_IMPL_CTEST(sname, tname, 0)
 #define CTEST_SKIP(sname, tname) CTEST_IMPL_CTEST(sname, tname, 1)
@@ -134,13 +175,13 @@ void CTEST_ERR(const char* fmt, ...) CTEST_IMPL_FORMAT_PRINTF(1, 2);  /* doesn't
 #define CTEST2_SKIP(sname, tname) CTEST_IMPL_CTEST2(sname, tname, 1)
 
 
-void assert_str(const char* exp, const char* real, const char* caller, int line, const char *descr);
+void assert_str(const char* exp, const char* real, const char* caller, int line, const char *msg);
 #define ASSERT_STR(exp, real) assert_str(exp, real, __FILE__, __LINE__, NULL)
 #define ASSERT_STR_D(exp, real, descr) assert_str(exp, real, __FILE__, __LINE__, descr)
 
-void assert_wstr(const wchar_t *exp, const wchar_t *real, const char* caller, int line, const char *descr);
+void assert_wstr(const wchar_t *exp, const wchar_t *real, const char* caller, int line, const char *msg);
 #define ASSERT_WSTR(exp, real) assert_wstr(exp, real, __FILE__, __LINE__, NULL)
-#define ASSERT_WSTR_D(exp, real) assert_wstr(exp, real, __FILE__, __LINE__, descr)
+#define ASSERT_WSTR_D(exp, real, descr) assert_wstr(exp, real, __FILE__, __LINE__, descr)
 
 void assert_data(const unsigned char* exp, size_t expsize,
                  const unsigned char* real, size_t realsize,
@@ -189,26 +230,18 @@ void assert_false(int real, const char* caller, int line, const char *descr);
 void assert_fail(const char* caller, int line, const char *descr);
 #define ASSERT_FAIL() assert_fail(__FILE__, __LINE__, NULL)
 #define ASSERT_FAIL_D(descr) assert_fail(__FILE__, __LINE__, descr)
+
 void assert_dbl_near(double exp, double real, double tol, const char* caller, int line, const char *descr);
 #define ASSERT_DBL_NEAR(exp, real) assert_dbl_near(exp, real, 1e-4, __FILE__, __LINE__, NULL)
 #define ASSERT_DBL_NEAR_D(exp, real, descr) assert_dbl_near(exp, real, 1e-4, __FILE__, __LINE__, descr)
 #define ASSERT_DBL_NEAR_TOL(exp, real, tol) assert_dbl_near(exp, real, tol, __FILE__, __LINE__, NULL)
-#define ASSERT_DBL_NEAR_TOL_D(exp, real, tol) assert_dbl_near(exp, real, tol, __FILE__, __LINE__, descr)
+#define ASSERT_DBL_NEAR_TOL_D(exp, real, tol, descr) assert_dbl_near(exp, real, tol, __FILE__, __LINE__, descr)
 
 void assert_dbl_far(double exp, double real, double tol, const char* caller, int line, const char *descr);
 #define ASSERT_DBL_FAR(exp, real) assert_dbl_far(exp, real, 1e-4, __FILE__, __LINE__, NULL)
 #define ASSERT_DBL_FAR_D(exp, real, descr) assert_dbl_far(exp, real, 1e-4, __FILE__, __LINE__, descr)
 #define ASSERT_DBL_FAR_TOL(exp, real, tol) assert_dbl_far(exp, real, tol, __FILE__, __LINE__, NULL)
 #define ASSERT_DBL_FAR_TOL_D(exp, real, tol, descr) assert_dbl_far(exp, real, tol, __FILE__, __LINE__, descr)
-
-void assert_step(intmax_t n, const char* caller, int line, const char *descr);
-#define ASSERT_STEP(n) assert_step(n, __FILE__, __LINE__, NULL)
-#define ASSERT_STEP_D(n, descr) assert_step(n, __FILE__, __LINE__, descr)
-
-void assert_d(const char* caller, int line, const char *descr);
-#define ASSERT_D(descr) assert_d(__FILE__, __LINE__, descr)
-
-#define ASSERT_FORMAT(fmt, ...) CTEST_ERR(fmt , __VA_ARGS__)
 
 #ifdef CTEST_MAIN
 
@@ -256,14 +289,14 @@ static void vprint_errormsg(const char* const fmt, va_list ap) CTEST_IMPL_FORMAT
 static void print_errormsg(const char* const fmt, ...) CTEST_IMPL_FORMAT_PRINTF(1, 2);
 
 static void vprint_errormsg(const char* const fmt, va_list ap) {
-    /* (v)snprintf returns the number that would have been written */
+    // (v)snprintf returns the number that would have been written
     const int ret = vsnprintf(ctest_errormsg, ctest_errorsize, fmt, ap);
     if (ret < 0) {
         ctest_errormsg[0] = 0x00;
     } else {
         const size_t size = (size_t) ret;
         const size_t s = (ctest_errorsize <= size ? size -ctest_errorsize : size);
-        /* ctest_errorsize may overflow at this point */
+        // ctest_errorsize may overflow at this point
         ctest_errorsize -= s;
         ctest_errormsg += s;
     }
@@ -319,14 +352,25 @@ void CTEST_ERR(const char* fmt, ...)
 
 CTEST_IMPL_DIAG_POP()
 
+char *CTEST_DESCRIPTION_FORMAT(char *buf, size_t n, const char* const fmt, ...) {
+    if (buf) {
+        buf[0] = '\0';
+        va_list argp;
+        va_start(argp, fmt);
+        vsnprintf(buf, n, fmt, argp);
+        va_end(argp);
+    }
+    return buf;
+}
+
 void assert_str(const char* exp, const char*  real, const char* caller, int line, const char *descr) {
     if ((exp == NULL && real != NULL) ||
         (exp != NULL && real == NULL) ||
         (exp && real && strcmp(exp, real) != 0)) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected '%s', got '%s'", caller, line, exp, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected '%s', got '%s': %s", caller, line, exp, real, descr);
+        else
+            CTEST_ERR("%s:%d  expected '%s', got '%s'", caller, line, exp, real);
     }
 }
 
@@ -334,10 +378,10 @@ void assert_wstr(const wchar_t *exp, const wchar_t *real, const char* caller, in
     if ((exp == NULL && real != NULL) ||
         (exp != NULL && real == NULL) ||
         (exp && real && wcscmp(exp, real) != 0)) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected '%ls', got '%ls'", caller, line, exp, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected '%ls', got '%ls': %s", caller, line, exp, real, descr);
+        else
+            CTEST_ERR("%s:%d  expected '%ls', got '%ls'", caller, line, exp, real);
     }
 }
 
@@ -346,65 +390,63 @@ void assert_data(const unsigned char* exp, size_t expsize,
                  const char* caller, int line, const char *descr) {
     size_t i;
     if (expsize != realsize) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected %" PRIuMAX " bytes, got %" PRIuMAX, caller, line, (uintmax_t) expsize, (uintmax_t) realsize);
+        if (descr)
+            CTEST_ERR("%s:%d  expected %" PRIuMAX " bytes, got %" PRIuMAX ": %s",
+                caller, line, (uintmax_t) expsize, (uintmax_t) realsize, descr);
         else
-            CTEST_ERR("%s:%d  expected %" PRIuMAX " bytes, got %" PRIuMAX ": %s", caller, line, (uintmax_t) expsize, (uintmax_t) realsize, descr);
+            CTEST_ERR("%s:%d  expected %" PRIuMAX " bytes, got %" PRIuMAX,
+                caller, line, (uintmax_t) expsize, (uintmax_t) realsize);
     }
     for (i=0; i<expsize; i++) {
         if (exp[i] != real[i]) {
-            if (descr == NULL)
-                CTEST_ERR("%s:%d expected 0x%02x at offset %" PRIuMAX " got 0x%02x",
-                    caller, line, exp[i], (uintmax_t) i, real[i]);
-            else
-                CTEST_ERR("%s:%d expected 0x%02x at offset %" PRIuMAX " got 0x%02x: %s",
-                    caller, line, exp[i], (uintmax_t) i, real[i], descr);
+            CTEST_ERR("%s:%d expected 0x%02x at offset %" PRIuMAX " got 0x%02x",
+                caller, line, exp[i], (uintmax_t) i, real[i]);
         }
     }
 }
 
 void assert_equal(intmax_t exp, intmax_t real, const char* caller, int line, const char *descr) {
     if (exp != real) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected %" PRIdMAX ", got %" PRIdMAX, caller, line, exp, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected %" PRIdMAX ", got %" PRIdMAX ": %s", caller, line, exp, real, descr);
+        else
+            CTEST_ERR("%s:%d  expected %" PRIdMAX ", got %" PRIdMAX, caller, line, exp, real);
     }
 }
 
 void assert_equal_u(uintmax_t exp, uintmax_t real, const char* caller, int line, const char *descr) {
     if (exp != real) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected %" PRIuMAX ", got %" PRIuMAX, caller, line, exp, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected %" PRIuMAX ", got %" PRIuMAX ": %s", caller, line, exp, real, descr);
+        else
+            CTEST_ERR("%s:%d  expected %" PRIuMAX ", got %" PRIuMAX, caller, line, exp, real);
     }
 }
 
 void assert_not_equal(intmax_t exp, intmax_t real, const char* caller, int line, const char *descr) {
     if ((exp) == (real)) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  should not be %" PRIdMAX, caller, line, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  should not be %" PRIdMAX ": %s", caller, line, real, descr);
+        else
+            CTEST_ERR("%s:%d  should not be %" PRIdMAX, caller, line, real);
     }
 }
 
 void assert_not_equal_u(uintmax_t exp, uintmax_t real, const char* caller, int line, const char *descr) {
     if ((exp) == (real)) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  should not be %" PRIuMAX, caller, line, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  should not be %" PRIuMAX ": %s", caller, line, real, descr);
+        else
+            CTEST_ERR("%s:%d  should not be %" PRIuMAX, caller, line, real);
     }
 }
 
 void assert_interval(intmax_t exp1, intmax_t exp2, intmax_t real, const char* caller, int line, const char *descr) {
     if (real < exp1 || real > exp2) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected %" PRIdMAX "-%" PRIdMAX ", got %" PRIdMAX, caller, line, exp1, exp2, real);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected %" PRIdMAX "-%" PRIdMAX ", got %" PRIdMAX ": %s", caller, line, exp1, exp2, real, descr);
+        else
+            CTEST_ERR("%s:%d  expected %" PRIdMAX "-%" PRIdMAX ", got %" PRIdMAX, caller, line, exp1, exp2, real);
     }
 }
 
@@ -416,10 +458,10 @@ void assert_dbl_near(double exp, double real, double tol, const char* caller, in
       absdiff *= -1;
     }
     if (absdiff > tol) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e)", caller, line, exp, real, diff, tol);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e): %s", caller, line, exp, real, diff, tol, descr);
+        else
+            CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e)", caller, line, exp, real, diff, tol);
     }
 }
 
@@ -431,67 +473,59 @@ void assert_dbl_far(double exp, double real, double tol, const char* caller, int
       absdiff *= -1;
     }
     if (absdiff <= tol) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e)", caller, line, exp, real, diff, tol);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e): %s", caller, line, exp, real, diff, tol, descr);
+        else
+            CTEST_ERR("%s:%d  expected %0.3e, got %0.3e (diff %0.3e, tol %0.3e)", caller, line, exp, real, diff, tol);
     }
 }
 
 void assert_null(void* real, const char* caller, int line, const char *descr) {
     if ((real) != NULL) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  should be NULL", caller, line);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  should be NULL: %s", caller, line, descr);
+        else
+            CTEST_ERR("%s:%d  should be NULL", caller, line);
     }
 }
 
 void assert_not_null(const void* real, const char* caller, int line, const char *descr) {
     if (real == NULL) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  should not be NULL", caller, line);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  should not be NULL: %s", caller, line, descr);
+        else
+            CTEST_ERR("%s:%d  should not be NULL", caller, line);
     }
 }
 
 void assert_true(int real, const char* caller, int line, const char *descr) {
     if ((real) == 0) {
-        if (descr == NULL)
+        if (descr)
+            CTEST_ERR("%s:%d  should be true: %s", caller, line, descr);
+        else
             CTEST_ERR("%s:%d  should be true", caller, line);
     }
 }
 
 void assert_false(int real, const char* caller, int line, const char *descr) {
     if ((real) != 0) {
-        if (descr == NULL)
-            CTEST_ERR("%s:%d  should be false", caller, line);
-        else
+        if (descr)
             CTEST_ERR("%s:%d  should be false: %s", caller, line, descr);
+        else
+            CTEST_ERR("%s:%d  should be false", caller, line);
     }
 }
 
 void assert_fail(const char* caller, int line, const char *descr) {
-    if (descr == NULL)
+    if (descr)
+        CTEST_ERR("%s:%d  shouldn't come here, %s", caller, line, descr);
+    else
         CTEST_ERR("%s:%d  shouldn't come here", caller, line);
-    else
-        CTEST_ERR("%s:%d  shouldn't come here: %s", caller, line, descr);
 }
 
-void assert_step(intmax_t n, const char* caller, int line, const char *descr) {
-    if (descr == NULL)
-        CTEST_ERR("%s:%d at %" PRIdMAX, caller, line, n);
-    else
-        CTEST_ERR("%s:%d at %" PRIdMAX ": %s", caller, line, n, descr);
-}
-
-void assert_d(const char* caller, int line, const char *descr) {
-    CTEST_ERR("%s:%d %s", caller, line, descr);
-}
 
 static int suite_all(struct ctest* t) {
-    (void) t; /* fix unused parameter warning */
+    (void) t; // fix unused parameter warning
     return 1;
 }
 
@@ -501,15 +535,16 @@ static int suite_filter(struct ctest* t) {
 
 static uint64_t getCurrentTime(void) {
     struct timeval now;
-    uint64_t now64;
     gettimeofday(&now, NULL);
-    now64 = (uint64_t) now.tv_sec * 1000000 + (uint64_t) now.tv_usec;
+    uint64_t now64 = (uint64_t) now.tv_sec;
+    now64 *= 1000000;
+    now64 += ((uint64_t) now.tv_usec);
     return now64;
 }
 
 static void color_print(const char* color, const char* text) {
     if (color_output)
-        printf("%s%s"ANSI_NORMAL"\n", color, text);
+        printf("%s%s" ANSI_NORMAL "\n", color, text);
     else
         printf("%s\n", text);
 }
@@ -522,7 +557,7 @@ static void sighandler(int signum)
     const char msg_nocolor[] = "[SIGSEGV: Segmentation fault]\n";
 
     const char* msg = color_output ? msg_color : msg_nocolor;
-    if (write(STDOUT_FILENO, msg, strlen(msg))) { /* we don't care if the call fails */ }
+    write(STDOUT_FILENO, msg, strlen(msg));
 
     /* "Unregister" the signal handler and send the signal back to the process
      * so it can terminate as expected */
@@ -541,13 +576,7 @@ __attribute__((no_sanitize_address)) int ctest_main(int argc, const char *argv[]
     static int num_skip = 0;
     static int idx = 1;
     static ctest_filter_func filter = suite_all;
-    uint64_t t1, t2;
-    struct ctest* ctest_begin;
-    struct ctest* ctest_end;
-    static struct ctest* test;
-    const char* color;
-    char results[80];
-    
+
 #ifdef CTEST_SEGFAULT
     signal(SIGSEGV, sighandler);
 #endif
@@ -561,11 +590,11 @@ __attribute__((no_sanitize_address)) int ctest_main(int argc, const char *argv[]
 #else
     color_output = isatty(1);
 #endif
-    t1 = getCurrentTime();
+    uint64_t t1 = getCurrentTime();
 
-    ctest_begin = &CTEST_IMPL_TNAME(suite, test);
-    ctest_end = &CTEST_IMPL_TNAME(suite, test);
-    /* find begin and end of section by comparing magics */
+    struct ctest* ctest_begin = &CTEST_IMPL_TNAME(suite, test);
+    struct ctest* ctest_end = &CTEST_IMPL_TNAME(suite, test);
+    // find begin and end of section by comparing magics
     while (1) {
         struct ctest* t = ctest_begin-1;
         if (t->magic != CTEST_IMPL_MAGIC) break;
@@ -578,6 +607,7 @@ __attribute__((no_sanitize_address)) int ctest_main(int argc, const char *argv[]
     }
     ctest_end++;    // end after last one
 
+    static struct ctest* test;
     for (test = ctest_begin; test != ctest_end; test++) {
         if (test == &CTEST_IMPL_TNAME(suite, test)) continue;
         if (filter(test)) total++;
@@ -599,11 +629,11 @@ __attribute__((no_sanitize_address)) int ctest_main(int argc, const char *argv[]
                 if (result == 0) {
                     if (test->setup && *test->setup) (*test->setup)(test->data);
                     if (test->data)
-                        test->run(test->data);
+                        test->run.unary(test->data);
                     else
-                        test->run();
+                        test->run.nullary();
                     if (test->teardown && *test->teardown) (*test->teardown)(test->data);
-                    /* if we got here it's ok */
+                    // if we got here it's ok
 #ifdef CTEST_COLOR_OK
                     color_print(ANSI_BGREEN, "[OK]");
 #else
@@ -619,14 +649,19 @@ __attribute__((no_sanitize_address)) int ctest_main(int argc, const char *argv[]
             idx++;
         }
     }
-    t2 = getCurrentTime();
+    uint64_t t2 = getCurrentTime();
 
-    color = (num_fail) ? ANSI_BRED : ANSI_GREEN;
+    const char* color = (num_fail) ? ANSI_BRED : ANSI_GREEN;
+    char results[80];
     snprintf(results, sizeof(results), "RESULTS: %d tests (%d ok, %d failed, %d skipped) ran in %" PRIu64 " ms", total, num_ok, num_fail, num_skip, (t2 - t1)/1000);
     color_print(color, results);
     return num_fail;
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
