@@ -1,6 +1,7 @@
 #ifndef __CONCURRENT_SPINLOCK_H__
 #define __CONCURRENT_SPINLOCK_H__
 
+#include <stdbool.h>
 #include <sched.h>
 #include <unistd.h>
 
@@ -17,7 +18,7 @@ typedef char spinlock_t;
 static inline void spinlock_init(spinlock_t *spinlock)
 {
     *spinlock = 0;
-    __sync_synchronize();
+    __atomic_thread_fence(__ATOMIC_SEQ_CST);
 }
 
 /**
@@ -27,7 +28,10 @@ static inline void spinlock_init(spinlock_t *spinlock)
  */
 static inline int spinlock_lock_try(spinlock_t *spinlock)
 {
-    if (__sync_bool_compare_and_swap(spinlock, 0, 1))
+    //if (__sync_bool_compare_and_swap(spinlock, 0, 1))
+    spinlock_t expected = 0;
+    // (type *ptr, type *expected, type desired, bool weak, int success_memorder, int failure_memorder)
+    if (__atomic_compare_exchange_n(spinlock, &expected, 1, false, __ATOMIC_ACQ_REL, __ATOMIC_CONSUME))
         return 0;
     else
         return -1;
@@ -41,9 +45,10 @@ static inline int spinlock_lock_try(spinlock_t *spinlock)
  */
 static inline void spinlock_lock(spinlock_t *spinlock)
 {
-    while (! __sync_bool_compare_and_swap(spinlock, 0, 1)) {
+ //   while (! __sync_bool_compare_and_swap(spinlock, 0, 1)) {
+    spinlock_t expected = 0;
+    while (!__atomic_compare_exchange_n(spinlock, &expected, 1, false, __ATOMIC_ACQ_REL, __ATOMIC_CONSUME))
         sched_yield();
-    }
 }
 
 /**
@@ -57,7 +62,9 @@ static inline void spinlock_lock(spinlock_t *spinlock)
  */
 static inline int spinlock_lock_wait(spinlock_t *spinlock, useconds_t usec, size_t n)
 {
-    while (! __sync_bool_compare_and_swap(spinlock, 0, 1)) {
+    //while (! __sync_bool_compare_and_swap(spinlock, 0, 1)) {
+    spinlock_t expected = 0;
+    while (!__atomic_compare_exchange_n(spinlock, &expected, 1, false, __ATOMIC_ACQ_REL, __ATOMIC_CONSUME)) {
         if (n == 0) {
             return -1;
         }
@@ -74,7 +81,9 @@ static inline int spinlock_lock_wait(spinlock_t *spinlock, useconds_t usec, size
  */
 static inline int spinlock_unlock(spinlock_t *spinlock)
 {
-    if (__sync_val_compare_and_swap(spinlock, 1, 0) == 1)
+    //if (__sync_val_compare_and_swap(spinlock, 1, 0) == 1)
+    spinlock_t expected = 1;
+    if (__atomic_compare_exchange_n(spinlock, &expected, 0, false, __ATOMIC_ACQ_REL, __ATOMIC_CONSUME))
         return 0;
     else
         return -1;
