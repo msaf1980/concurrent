@@ -45,7 +45,7 @@ void queue_destroy(queue *q);
 /* Delete an instance of a queue (call queue_destroy) and free all items before.
  * q : Queue instance handle.
  * */
-void queue_delete(queue *q, free_func f);
+void queue_delete(queue *q, queue_free_func f);
 /**
  * Enqueues the string pointed to by p at queue q.  If the queue is
  * full, 0 is returned.  For this reason, enqueuing will

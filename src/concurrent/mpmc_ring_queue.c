@@ -69,7 +69,7 @@ qerr_t mpmc_ring_queue_destroy(mpmc_ring_queue *q) {
     return QERR_OK;
 } /* mpmc_ring_queue_destroy */
 
-qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q, free_func f) {
+qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q, queue_free_func f) {
     void *p;
     if (f == NULL) {
         f = free;

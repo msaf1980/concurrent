@@ -63,7 +63,7 @@ queue_destroy(queue *q)
 }
 
 
-void queue_delete(queue *q, free_func f)
+void queue_delete(queue *q, queue_free_func f)
 {
 	const char *p;
     if (f == NULL) {
