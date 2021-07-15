@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+*
+* Public header
+*/
+
 
 #ifndef QUEUE_H
 #define QUEUE_H 1
@@ -22,7 +28,10 @@
 
 #include <concurrent/queuedef.h>
 
-/* blocking circular queue with pthread mutex */
+/**
+ * @typedef queue
+ * @brief  blocking circular queue with pthread mutex
+ */
 typedef struct _queue queue;
 
 /* Allocates a new queue structure with capacity to hold size elements. */

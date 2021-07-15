@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/**
+ * @file
+*
+* Public header
+*/
+
 typedef unsigned int qerr_t;
 
 /* Most q APIs return "int ".  These definitions must
@@ -29,6 +35,9 @@ const char *queue_qerr_str(qerr_t qerr);
 size_t size_to_power_of_2(size_t q_size);
 
 
-typedef void (*free_func)(void *ptr);
+/**
+ * @typedef  queue_free_func
+ */
+typedef void (*queue_free_func)(void *ptr);
 
 #endif /* __QUEUEDEF_H__ */

@@ -12,7 +12,6 @@ include_directories (include)
 
 add_subdirectory (src/concurrent)
 #add_subdirectory (src/threads)
-
 add_subdirectory (doc)
 
 if (BUILD_TEST)
