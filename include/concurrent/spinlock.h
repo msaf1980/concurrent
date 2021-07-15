@@ -53,8 +53,10 @@ __CONCURRENT_INLINE int spinlock_lock_try(spinlock_t *spinlock)
 __CONCURRENT_INLINE void spinlock_lock(spinlock_t *spinlock)
 {
     spinlock_t expected = 0;
-    while (!__atomic_compare_exchange_n(spinlock, &expected, 1, false, __ATOMIC_ACQ_REL, __ATOMIC_CONSUME))
+    while (!__atomic_compare_exchange_n(spinlock, &expected, 1, false, __ATOMIC_ACQ_REL, __ATOMIC_CONSUME)) {
+        expected = 0;
         sched_yield();
+    }
 }
 
 /**
@@ -74,6 +76,7 @@ __CONCURRENT_INLINE int spinlock_lock_wait(spinlock_t *spinlock, useconds_t usec
         if (n == 0) {
             return -1;
         }
+        expected = 0;
         usleep(usec);
         n--;
     }
