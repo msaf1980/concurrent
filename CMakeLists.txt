@@ -10,17 +10,13 @@ project (libconcurrent)
 
 include_directories (include)
 
-set(REQURED_LIBS)
+add_subdirectory (src/concurrent)
+#add_subdirectory (src/threads)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-  add_definitions(-DDEBUG)
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-add_subdirectory (src)
+add_subdirectory (doc)
 
 if (BUILD_TEST)
     include(CTest)
-    add_subdirectory(test)
+    add_subdirectory(test/concurrent)
+    #add_subdirectory(test/threads)
 endif() # END TEST

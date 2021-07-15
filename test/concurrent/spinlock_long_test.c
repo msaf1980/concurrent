@@ -1,3 +1,6 @@
+/*
+ * For check CPU usage on long operations
+ */
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,7 +14,6 @@
 #endif
 
 #include <concurrent/spinlock.h>
-
 #include <concurrent/arch.h>
 
 #define CTEST_MAIN
@@ -19,33 +21,35 @@
 
 #include "ctest.h"
 
+#define LOOP_COUNT 10000
+
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
 
 typedef struct {
     char padding1[CACHE_LINE_SIZE - sizeof(int)];
     size_t cnt;
-    char spinlock;
+    spinlock_t spinlock;
     size_t loops;
     int verify; /* disable check order (for multithread testing) */
     pthread_barrier_t barrier;
 } tst_t;
 
-static void *spinlock_lock_unlock_thread(void *in_arg) {
+static void *spinlock_lock_thread(void *in_arg) {
     tst_t *test_data = (tst_t *) in_arg;
     char *spinlock = &test_data->spinlock;
     pthread_barrier_wait(&test_data->barrier);
     while (__sync_fetch_and_add(&test_data->cnt, 1) < test_data->loops) {
         spinlock_lock(spinlock);
+        usleep(1);
         spinlock_unlock(spinlock);
     } /* while */
 
     pthread_exit(NULL);
     return NULL; /* don't need this, but keep the compiler happy */
-} /* spinlock_thread */
+}
 
-
-void spinlock_lock_unlock(size_t loops, unsigned workers) {
+void spinlock_lock_test(size_t loops, unsigned workers) {
     /* Prepare for threading tests */
     int perr;
     uint64_t start, end;
@@ -73,7 +77,7 @@ void spinlock_lock_unlock(size_t loops, unsigned workers) {
     pthread_attr_setdetachstate(&thr_attr, PTHREAD_CREATE_JOINABLE);
 
     for (i = 0; i < workers; i++) {
-        perr = pthread_create(&t_handles[i], &thr_attr, spinlock_lock_unlock_thread,
+        perr = pthread_create(&t_handles[i], &thr_attr, spinlock_lock_thread,
                               &test_data);
         ASSERT_EQUAL_D(0, perr, "thread create");
     }
@@ -101,24 +105,24 @@ void spinlock_lock_unlock(size_t loops, unsigned workers) {
            (unsigned long long) (end - start) * 1000 / test_data.loops);
 }
 
-CTEST(spinlock, lock_unlock) {
-    spinlock_lock_unlock(10000000, 1);
+CTEST(spinlock, lock) {
+    spinlock_lock_test(LOOP_COUNT, 1);
 }
 
-CTEST(queue_thread, lock_unlock4) {
-    spinlock_lock_unlock(10000000, 4);
+CTEST(spinlock, lock4) {
+    spinlock_lock_test(LOOP_COUNT, 4);
 }
 
-CTEST(queue_thread, lock_unlock8) {
-    spinlock_lock_unlock(10000000, 8);
+CTEST(spinlock, lock8) {
+    spinlock_lock_test(LOOP_COUNT, 8);
 }
 
-CTEST(queue_thread, lock_unlock16) {
-    spinlock_lock_unlock(10000000, 16);
+CTEST(spinlock, lock16) {
+    spinlock_lock_test(LOOP_COUNT, 16);
 }
 
-CTEST(queue_thread, lock_unlock64) {
-    spinlock_lock_unlock(10000000, 64);
+CTEST(spinlock, lock64) {
+    spinlock_lock_test(LOOP_COUNT, 64);
 }
 
 int main(int argc, const char *argv[]) {

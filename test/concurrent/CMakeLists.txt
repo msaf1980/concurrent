@@ -1,6 +1,6 @@
 # Scan source dir for standart source files and exclude main.cpp
 
-include_directories(../include ../src)
+include_directories(../../include ../../src ..)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -54,6 +54,32 @@ add_test(
     NAME test_spinlock_scale
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
 )
+
+add_executable(test_spinlock_long spinlock_long_test.c)
+target_link_libraries(test_spinlock_long ${TEST_LIBRARIES})
+add_test(
+    NAME test_spinlock_long
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
+)
+
+add_executable(test_barrier barrier_test.c)
+target_link_libraries(test_barrier ${TEST_LIBRARIES})
+add_test(
+    NAME test_barrier
+    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_barrier
+)
+
+add_executable(test_pthread_spin_scale pthread_spin_scale_test.c)
+target_link_libraries(test_pthread_spin_scale ${TEST_LIBRARIES})
+
+add_executable(test_pthread_spin_long pthread_spin_long_test.c)
+target_link_libraries(test_pthread_spin_long ${TEST_LIBRARIES})
+
+add_executable(test_pthread_mutex_scale pthread_mutex_scale_test.c)
+target_link_libraries(test_pthread_mutex_scale ${TEST_LIBRARIES})
+
+add_executable(test_pthread_mutex_long pthread_mutex_long_test.c)
+target_link_libraries(test_pthread_mutex_long ${TEST_LIBRARIES})
 
 add_executable(bench_queue queue_bench.c ${REQUIRED_SOURCES})
 target_link_libraries(bench_queue ${TEST_LIBRARIES})

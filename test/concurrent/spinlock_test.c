@@ -13,7 +13,7 @@
 #include "ctest.h"
 
 CTEST(spinlock, test) {
-    char spinlock;
+    spinlock_t spinlock;
     spinlock_init(&spinlock);
     ASSERT_EQUAL(0, spinlock);
 

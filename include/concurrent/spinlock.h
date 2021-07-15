@@ -5,11 +5,16 @@
 #include <unistd.h>
 
 /**
+ * @brief  Spinlock (short-duration userspace lock with atomic)
+ */
+typedef char spinlock_t;
+
+/**
  * @brief  init spinlock
  * @param  *spinlock: 
  * @retval 
  */
-static inline void spinlock_init(char *spinlock)
+static inline void spinlock_init(spinlock_t *spinlock)
 {
     *spinlock = 0;
     __sync_synchronize();
@@ -20,7 +25,7 @@ static inline void spinlock_init(char *spinlock)
  * @param  *spinlock: 
  * @retval 0 on success, -1 on failure
  */
-static inline int spinlock_lock_try(char *spinlock)
+static inline int spinlock_lock_try(spinlock_t *spinlock)
 {
     if (__sync_bool_compare_and_swap(spinlock, 0, 1))
         return 0;
@@ -31,10 +36,10 @@ static inline int spinlock_lock_try(char *spinlock)
 /**
  * @brief  lock spinlock (loop until success)
  * 
- * when failed, call sched_yield() and retry
+ * When failed, yield with sched_yield() and retry. Without yield sometimes can be slow.
  * @param  *spinlock: 
  */
-void spinlock_lock(char *spinlock)
+static inline void spinlock_lock(spinlock_t *spinlock)
 {
     while (! __sync_bool_compare_and_swap(spinlock, 0, 1)) {
         sched_yield();
@@ -46,11 +51,11 @@ void spinlock_lock(char *spinlock)
  * 
  * When failed, call usleep(usec) (up to n count)
  * @param  *spinlock: 
- * @param  usec microseconds to sleep
- * @param  n    count for sleep on failure
+ * @param  usec: microseconds to sleep
+ * @param  n:    count for sleep on failure
  * @retval 0 on success, -1 on failure
  */
-static inline int spinlock_lock_wait(char *spinlock, useconds_t usec, size_t n)
+static inline int spinlock_lock_wait(spinlock_t *spinlock, useconds_t usec, size_t n)
 {
     while (! __sync_bool_compare_and_swap(spinlock, 0, 1)) {
         if (n == 0) {
@@ -67,7 +72,7 @@ static inline int spinlock_lock_wait(char *spinlock, useconds_t usec, size_t n)
  * @param  *spinlock: 
  * @retval 0 on success, -1 on error (not unlocked)
  */
-static inline int spinlock_unlock(char *spinlock)
+static inline int spinlock_unlock(spinlock_t *spinlock)
 {
     if (__sync_val_compare_and_swap(spinlock, 1, 0) == 1)
         return 0;
