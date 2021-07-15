@@ -13,14 +13,16 @@ check_function_exists(pthread_barrier_init HAVE_PTHREAD_BARRIER)
 if(HAVE_PTHREAD_BARRIER)
     ADD_DEFINITIONS(-DHAVE_PTHREAD_BARRIER=1)   
 else()
-    list(APPEND REQUIRED_SOURCES "pthread_barrier.c")
+    list(APPEND REQUIRED_SOURCES ../pthread_barrier.c)
     ADD_DEFINITIONS(-DHAVE_PTHREAD_BARRIER=0)
 endif()
+check_function_exists(pthread_spin_init HAVE_PTHREAD_SPIN)
+
 
 set(TEST_LIBRARIES concurrent_static Threads::Threads)
 
 # Build tests
-add_executable(test_mpmc_ring_queue mpmc_ring_queue_test.c)
+add_executable(test_mpmc_ring_queue mpmc_ring_queue_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_mpmc_ring_queue ${TEST_LIBRARIES})
 target_compile_options(test_mpmc_ring_queue PRIVATE -Wdeclaration-after-statement)
 add_test(
@@ -28,7 +30,7 @@ add_test(
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue
 )
 
-add_executable(test_mpmc_ring_queue_scale mpmc_ring_queue_scale_test.c)
+add_executable(test_mpmc_ring_queue_scale mpmc_ring_queue_scale_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_mpmc_ring_queue_scale ${TEST_LIBRARIES})
 target_compile_options(test_mpmc_ring_queue_scale PRIVATE -Wdeclaration-after-statement)
 add_test(
@@ -36,51 +38,53 @@ add_test(
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue_scale
 )
 
-add_executable(test_queuedef queuedef_test.c)
+add_executable(test_queuedef queuedef_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_queuedef ${TEST_LIBRARIES})
 add_test(
     NAME test_queuedef
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_queuedef
 )
 
-add_executable(test_spinlock spinlock_test.c)
+add_executable(test_spinlock spinlock_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_spinlock ${TEST_LIBRARIES})
 add_test(
     NAME test_spinlock
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock
 )
 
-add_executable(test_spinlock_scale spinlock_scale_test.c)
+add_executable(test_spinlock_scale spinlock_scale_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_spinlock_scale ${TEST_LIBRARIES})
 add_test(
     NAME test_spinlock_scale
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
 )
 
-add_executable(test_spinlock_long spinlock_long_test.c)
+add_executable(test_spinlock_long spinlock_long_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_spinlock_long ${TEST_LIBRARIES})
 add_test(
     NAME test_spinlock_long
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
 )
 
-add_executable(test_barrier barrier_test.c)
+add_executable(test_barrier barrier_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_barrier ${TEST_LIBRARIES})
 add_test(
     NAME test_barrier
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_barrier
 )
 
-add_executable(test_pthread_spin_scale pthread_spin_scale_test.c)
-target_link_libraries(test_pthread_spin_scale ${TEST_LIBRARIES})
+if(HAVE_PTHREAD_SPIN)
+    add_executable(test_pthread_spin_scale pthread_spin_scale_test.c ${REQUIRED_SOURCES})
+    target_link_libraries(test_pthread_spin_scale ${TEST_LIBRARIES})
 
-add_executable(test_pthread_spin_long pthread_spin_long_test.c)
-target_link_libraries(test_pthread_spin_long ${TEST_LIBRARIES})
+    add_executable(test_pthread_spin_long pthread_spin_long_test.c ${REQUIRED_SOURCES})
+    target_link_libraries(test_pthread_spin_long ${TEST_LIBRARIES})
+endif()
 
-add_executable(test_pthread_mutex_scale pthread_mutex_scale_test.c)
+add_executable(test_pthread_mutex_scale pthread_mutex_scale_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_pthread_mutex_scale ${TEST_LIBRARIES})
 
-add_executable(test_pthread_mutex_long pthread_mutex_long_test.c)
+add_executable(test_pthread_mutex_long pthread_mutex_long_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_pthread_mutex_long ${TEST_LIBRARIES})
 
 add_executable(bench_queue queue_bench.c ${REQUIRED_SOURCES})

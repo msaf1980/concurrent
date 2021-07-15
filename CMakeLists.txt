@@ -18,13 +18,11 @@ endforeach(cmakeFile)
 include_directories (include)
 
 add_subdirectory (src/concurrent)
-#add_subdirectory (src/threads)
 add_subdirectory (doc)
 
 if (BUILD_TEST)
     include(CTest)
     add_subdirectory(test/concurrent)
-    #add_subdirectory(test/threads)
 endif() # END TEST
 
 include(${CMAKE_SOURCE_DIR}/options_print.cmake)
