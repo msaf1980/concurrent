@@ -52,7 +52,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
 
     ASSERT_EQUAL_D(1, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(4, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(4, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(0, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
 
     v = I2V 999;
@@ -65,7 +65,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
     /* retry empty  check */
     ASSERT_EQUAL_D(1, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(4, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(4, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(0, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
 
     v = I2V 111;
@@ -75,7 +75,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
                      "queue_enqueue (0) not set");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(3, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(3, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(1, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.put_pos = 1;
@@ -90,7 +90,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
                      "queue_enqueue (1) not set");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(2, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(2, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(2, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.put_pos = 2;
@@ -105,7 +105,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
                      "queue_enqueue (2) not set");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(1, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(1, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(3, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.put_pos = 3;
@@ -120,7 +120,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
                      "queue_enqueue (2) not set");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(1, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(0, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(0, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(4, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.put_pos = 4;
@@ -133,14 +133,14 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
     ASSERT_EQUAL_D(QERR_FULL, qerr, "queue_enqueue (full)");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(1, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(0, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(0, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(4, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
 
     v = mpmc_ring_queue_dequeue(q);
     ASSERT_EQUAL_U_D(111, (size_t) v, "queue_dequeue (0)");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(1, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(1, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(3, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.get_pos = 1;
@@ -152,7 +152,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
     ASSERT_EQUAL_U_D(222, (size_t) v, "queue_dequeue (1)");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(2, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(2, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(2, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.get_pos = 2;
@@ -167,7 +167,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
                      "queue_enqueue (0) not set value");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(1, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(1, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(3, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.put_pos = 5;
@@ -179,7 +179,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
     ASSERT_EQUAL_U_D(333, (size_t) v, "queue_dequeue (2)");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(2, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(2, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(2, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.get_pos = 3;
@@ -191,7 +191,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
     ASSERT_EQUAL_U_D(444, (size_t) v, "queue_dequeue (3)");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(3, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(3, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(1, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.get_pos = 4;
@@ -203,7 +203,7 @@ CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
     ASSERT_EQUAL_U_D(555, (size_t) v, "queue_dequeue (4)");
     ASSERT_EQUAL_D(1, mpmc_ring_queue_empty(q), "queue_is_empthy");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q), "queue_is_full");
-    ASSERT_EQUAL_U_D(4, mpmc_ring_queue_free_relaxed(q), "queue_free_relaxed");
+    ASSERT_EQUAL_U_D(4, mpmc_ring_queue_freesizesize_relaxed(q), "queue_freesize_relaxed");
     ASSERT_EQUAL_U_D(0, mpmc_ring_queue_len_relaxed(q), "queue_len_relaxed");
     /* check for memory corruption */
     save_q.get_pos = 5;
@@ -273,7 +273,7 @@ CTEST(mpmc_ring_queue_size_max, overflow_dequeue) {
     ASSERT_EQUAL_D(0, mpmc_ring_queue_empty(q_pos.q), "queue_is_empty");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q_pos.q), "queue_is_full");
     ASSERT_EQUAL_U(mpmc_ring_queue_size(q_pos.q) - 1,
-                   mpmc_ring_queue_free_relaxed(q_pos.q));
+                   mpmc_ring_queue_freesizesize_relaxed(q_pos.q));
 
     q_pos.pos = q_pos.q->get_pos;
     /* simulate dequeue n other thread after get_pos was read in
@@ -296,7 +296,7 @@ CTEST(mpmc_ring_queue_size_max, overflow_dequeue) {
     ASSERT_EQUAL_D(1, mpmc_ring_queue_empty(q_pos.q), "queue_is_empty");
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q_pos.q), "queue_is_full");
     ASSERT_EQUAL_U(mpmc_ring_queue_size(q_pos.q),
-                   mpmc_ring_queue_free_relaxed(q_pos.q));
+                   mpmc_ring_queue_freesizesize_relaxed(q_pos.q));
 }
 
 typedef struct {

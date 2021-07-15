@@ -12,6 +12,10 @@ if(CMAKE_COMPILER_IS_GNU)
 endif(CMAKE_COMPILER_IS_GNU)
 
 if(CMAKE_COMPILER_IS_GNU OR CMAKE_COMPILER_IS_CLANG)
+	if(PROFILE)
+		append_flag(CMAKE_EXE_LINKER_FLAGS "-lprofiler" "-lprofiler")
+	endif()
+
 	add_compile_options(-Wall)
 	add_compile_options(-Wextra)
 	add_compile_options(-W)
@@ -20,84 +24,43 @@ if(CMAKE_COMPILER_IS_GNU OR CMAKE_COMPILER_IS_CLANG)
 	add_compile_options(-Wdeclaration-after-statement)
 	add_compile_options(-Wwrite-strings)
 
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		append_flag(CMAKE_C_FLAGS_DEBUG "-O0" "-O")
-		append_flag(CMAKE_CXX_FLAGS_DEBUG "-O0" "-O")
+	if(CMAKE_BUILD_TYPE MATCHES "Debug")
+		append_flag(CMAKE_C_FLAGS "-O0")
+		append_flag(CMAKE_CXX_FLAGS "-O0")
 		add_definitions(-DDEBUG)
-	endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-	# ASAN
-	set(ASAN_COMPILER_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common")
-	set(ASAN_LINKER_FLAGS "-lasan")
-	# For enable UBSan
-	#set(ASAN_COMPILER_FLAGS "${ASAN_COMPILER_FLAGS} -fsanitize=undefined")
-	#set(ASAN_LINKER_FLAGS "${ASAN_LINKER_FLAGS} -lubsan")
-	set(CMAKE_C_FLAGS_ASAN
-    	"${CMAKE_C_FLAGS_DEBUG} ${ASAN_COMPILER_FLAGS}" CACHE STRING
-    	"Flags used by the C compiler for ASan build type or configuration." FORCE)
-
-	set(CMAKE_CXX_FLAGS_ASAN
-    	"${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_COMPILER_FLAGS}" CACHE STRING
-    	"Flags used by the C++ compiler for ASan build type or configuration." FORCE)
-
-	set(CMAKE_EXE_LINKER_FLAGS_ASAN
-    	"${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${ASAN_LINKER_FLAGS}" CACHE STRING
-    	"Linker flags to be used to create executables for ASan build type." FORCE)
-
-	set(CMAKE_SHARED_LINKER_FLAGS_ASAN
-		"${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${ASAN_LINKER_FLAGS}" CACHE STRING
-		"Linker lags to be used to create shared libraries for ASan build type." FORCE)	
-
-	# TSAN
-	set(TSAN_COMPILER_FLAGS "-fsanitize=thread -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-	set(TSAN_LINKER_FLAGS "-ltsan")
-	set(CMAKE_C_FLAGS_TSAN
-    	"${CMAKE_C_FLAGS_DEBUG} ${TSAN_COMPILER_FLAGS}" CACHE STRING
-    	"Flags used by the C compiler for TSan build type or configuration." FORCE)
-
-	set(CMAKE_CXX_FLAGS_TSAN
-    	"${CMAKE_CXX_FLAGS_DEBUG} ${TSAN_COMPILER_FLAGS}" CACHE STRING
-    	"Flags used by the C++ compiler for TSan build type or configuration." FORCE)
-
-	set(CMAKE_EXE_LINKER_FLAGS_TSAN
-    	"${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${TSAN_LINKER_FLAGS}" CACHE STRING
-    	"Linker flags to be used to create executables for TSan build type." FORCE)
-
-	set(CMAKE_SHARED_LINKER_FLAGS_TSAN
-		"${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${TSAN_LINKER_FLAGS}" CACHE STRING
-		"Linker lags to be used to create shared libraries for TSan build type." FORCE)
-
-	# Coverage
-	set(COVERAGE_FLAGS "--coverage")
-	set(CMAKE_C_FLAGS_COVERAGE
-    	"${CMAKE_C_FLAGS_DEBUG} ${COVERAGE_FLAGS}" CACHE STRING
-    	"Flags used by the C compiler for Coverage build type or configuration." FORCE)
-
-	set(CMAKE_CXX_FLAGS_COVERAGE
-    	"${CMAKE_CXX_FLAGS_DEBUG} ${COVERAGE_FLAGS}" CACHE STRING
-    	"Flags used by the C++ compiler for Coverage build type or configuration." FORCE)
-
-	set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
-    	"${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
-    	"Linker flags to be used to create executables for Coverage build type." FORCE)
-
-	set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-		"${CMAKE_SHARED_LINKER_FLAGS_DEBUG} ${COVERAGE_FLAGS}" CACHE STRING
-		"Linker lags to be used to create shared libraries for Coverage build type." FORCE)
-
-	# if(CMAKE_BUILD_TYPE STREQUAL "ASan")
-	# 	add_definitions(-DDEBUG)
-	# endif(CMAKE_BUILD_TYPE STREQUAL "ASan")
-
-	# if(CMAKE_BUILD_TYPE STREQUAL "TSan")
-	# 	add_definitions(-DDEBUG)
-	# endif(CMAKE_BUILD_TYPE STREQUAL "TSan")
-
+	endif(CMAKE_BUILD_TYPE MATCHES "Debug")
 	# if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	# endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 
-	if(PROFILE)
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lprofiler")
+	# ASAN
+	if(CMAKE_BUILD_TYPE MATCHES "ASan")
+	    set(ASAN_COMPILER_FLAGS "-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common")
+	    set(ASAN_LINKER_FLAGS "-lasan")
+	    # For enable UBSan
+	    #set(ASAN_COMPILER_FLAGS "${ASAN_COMPILER_FLAGS} -fsanitize=undefined")
+	    #set(ASAN_LINKER_FLAGS "${ASAN_LINKER_FLAGS} -lubsan")
+	    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ASAN_COMPILER_FLAGS}")
+	    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ASAN_COMPILER_FLAGS}")
+	    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ASAN_LINKER_FLAGS}")
+	    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ASAN_LINKER_FLAGS}")
+	endif()
+	
+	# TSAN
+	if(CMAKE_BUILD_TYPE MATCHES "TSan")
+	    set(TSAN_COMPILER_FLAGS "-fsanitize=thread -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+	    set(TSAN_LINKER_FLAGS "-ltsan")
+	    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${TSAN_COMPILER_FLAGS}")
+	    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TSAN_COMPILER_FLAGS}")
+	    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TSAN_LINKER_FLAGS}")
+	    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TSAN_LINKER_FLAGS}")
+	endif()
+	
+	# Coverage
+	if(CMAKE_BUILD_TYPE MATCHES "Coverage")
+		append_flag(CMAKE_C_FLAGS "--coverage")
+		append_flag(CMAKE_CXX_FLAGS "--coverage")
+		append_flag(CMAKE_C_FLAGS_COVERAGE "--coverage")
+		append_flag(CMAKE_EXE_LINKER_FLAGS_COVERAGE "--coverage")
 	endif()
 
 endif(CMAKE_COMPILER_IS_GNU OR CMAKE_COMPILER_IS_CLANG)

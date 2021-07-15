@@ -61,7 +61,7 @@ void spinlock_lock_test(size_t loops, unsigned workers) {
     tst_t test_data; /* shared with test threads */
 
     t_handles = malloc(sizeof(pthread_t) * workers);
-    ASSERT_NOT_NULL(t_handles);
+    ASSERT_TRUE(t_handles != NULL);
 
     spinlock_init(&test_data.spinlock);
 
@@ -97,7 +97,7 @@ void spinlock_lock_test(size_t loops, unsigned workers) {
 
     pthread_barrier_destroy(&test_data.barrier);
 
-    ASSERT_EQUAL_D(test_data.loops + workers, test_data.cnt, "count mismatch");
+    ASSERT_EQUAL_U_D(test_data.loops + workers, test_data.cnt, "count mismatch");
 
     printf("(%f ms, %lu iterations, %llu ns/op) ",
            ((double) end - (double) start) / 1000,

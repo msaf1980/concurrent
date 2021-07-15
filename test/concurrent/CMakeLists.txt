@@ -22,6 +22,7 @@ set(TEST_LIBRARIES concurrent_static Threads::Threads)
 # Build tests
 add_executable(test_mpmc_ring_queue mpmc_ring_queue_test.c)
 target_link_libraries(test_mpmc_ring_queue ${TEST_LIBRARIES})
+target_compile_options(test_mpmc_ring_queue PRIVATE -Wdeclaration-after-statement)
 add_test(
     NAME test_mpmc_ring_queue
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue
@@ -29,6 +30,7 @@ add_test(
 
 add_executable(test_mpmc_ring_queue_scale mpmc_ring_queue_scale_test.c)
 target_link_libraries(test_mpmc_ring_queue_scale ${TEST_LIBRARIES})
+target_compile_options(test_mpmc_ring_queue_scale PRIVATE -Wdeclaration-after-statement)
 add_test(
     NAME test_mpmc_ring_queue_scale
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue_scale

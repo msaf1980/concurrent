@@ -1,12 +1,19 @@
 cmake_minimum_required(VERSION 3.5)
 
 option(BUILD_TEST "Build tests" ON)
+option(PROFILE "Profile with google perftools" OFF)
 
 include (CheckFunctionExists)
 include (CheckIncludeFiles)
 include (CheckSymbolExists)
 
 project (libconcurrent)
+
+file(GLOB cmakeFiles cmake/*.cmake)
+foreach(cmakeFile ${cmakeFiles})
+    message("INCLUDE ${cmakeFile}")
+    include(${cmakeFile})
+endforeach(cmakeFile)
 
 include_directories (include)
 
@@ -19,3 +26,5 @@ if (BUILD_TEST)
     add_subdirectory(test/concurrent)
     #add_subdirectory(test/threads)
 endif() # END TEST
+
+include(${CMAKE_SOURCE_DIR}/options_print.cmake)

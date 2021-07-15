@@ -15,6 +15,7 @@
 
 static void *barrier_wait_thread(void *in_arg) {
     barrier_wait((barrier_t *) in_arg);
+    return NULL;
 }
 
 #define WORKERS 10
@@ -51,7 +52,7 @@ CTEST(barrier, test) {
 
     ASSERT_EQUAL(0, barrier);
 
-    printf("(%f ms, %d count) ",
+    printf("(%f ms, %lu count) ",
            ((double) end - (double) start) / 1000,
            (unsigned long) WORKERS+1);
 }
