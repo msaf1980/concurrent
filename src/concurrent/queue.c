@@ -63,7 +63,7 @@ queue_destroy(queue *q)
 }
 
 
-void queue_delete(queue *q, queue_free_func f)
+void queue_delete(queue *q, queue_freesize_func f)
 {
 	const char *p;
     if (f == NULL) {
@@ -79,19 +79,6 @@ void queue_delete(queue *q, queue_free_func f)
 int
 queue_enqueue(queue *q, const char *p)
 {
-	/* queue normal:
-	 * |=====-----------------------------|  4
-	 * ^    ^
-	 * r    w
-	 * queue wrap:
-	 * |===---------------------------====|  6
-	 *    ^                           ^
-	 *    w                           r
-	 * queue full
-	 * |==================================| 23
-	 *          ^
-	 *         w+r
-	 */
 	pthread_mutex_lock(&q->lock);
 	if (q->len == q->end) {
 		pthread_mutex_unlock(&q->lock);
@@ -176,7 +163,7 @@ queue_len(queue *q)
 }
 
 inline size_t
-queue_free(queue *q)
+queue_freesize(queue *q)
 {
 	return q->end - queue_len(q);
 }

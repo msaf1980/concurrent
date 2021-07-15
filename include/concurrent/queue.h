@@ -45,11 +45,10 @@ void queue_destroy(queue *q);
 /* Delete an instance of a queue (call queue_destroy) and free all items before.
  * q : Queue instance handle.
  * */
-void queue_delete(queue *q, queue_free_func f);
+void queue_delete(queue *q, queue_freesize_func f);
 /**
  * Enqueues the string pointed to by p at queue q.  If the queue is
- * full, 0 is returned.  For this reason, enqueuing will
- * never fail.  This function assumes the pointer p is a copy for this
+ * full, 0 is returned. This function assumes the pointer p is a copy for this
  * queue, that is returned on dequeue, or freed when dropped.
  */
 int queue_enqueue(queue *q, const char *p);
@@ -85,7 +84,7 @@ size_t queue_len(queue *q);
  * Returns the (approximate) size of free entries in the queue.  The
  * same conditions as for queue_len apply.
  */
-size_t queue_free(queue *q);
+size_t queue_freesize(queue *q);
 /**
  * Returns the size of the queue.
  */

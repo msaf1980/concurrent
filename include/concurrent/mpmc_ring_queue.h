@@ -51,7 +51,7 @@ qerr_t mpmc_ring_queue_destroy(mpmc_ring_queue *q);
  * @param f: pointer to free function
  * @retval QERR_OK on success, or other QERR_* value on error.
  */
-qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q, queue_free_func f);
+qerr_t mpmc_ring_queue_delete(mpmc_ring_queue *q, queue_freesize_func f);
 
 /**
  * @brief Add a message to the queue.
@@ -96,7 +96,7 @@ size_t mpmc_ring_queue_size(mpmc_ring_queue *q);
  * @param q: Queue instance handle.
  * @retval queue free length
  */
-size_t mpmc_ring_queue_free_relaxed(mpmc_ring_queue *q);
+size_t mpmc_ring_queue_freesizesize_relaxed(mpmc_ring_queue *q);
 
 /**
  * @brief Get queue length (not full consistent).

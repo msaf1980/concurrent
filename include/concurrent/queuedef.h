@@ -36,8 +36,8 @@ size_t size_to_power_of_2(size_t q_size);
 
 
 /**
- * @typedef  queue_free_func
+ * @typedef  queue_freesize_func
  */
-typedef void (*queue_free_func)(void *ptr);
+typedef void (*queue_freesize_func)(void *ptr);
 
 #endif /* __QUEUEDEF_H__ */
