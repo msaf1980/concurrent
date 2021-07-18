@@ -18,7 +18,6 @@ else()
 endif()
 check_function_exists(pthread_spin_init HAVE_PTHREAD_SPIN)
 
-
 set(TEST_LIBRARIES concurrent_static Threads::Threads)
 
 # Build tests
@@ -27,7 +26,7 @@ target_link_libraries(test_mpmc_ring_queue ${TEST_LIBRARIES})
 target_compile_options(test_mpmc_ring_queue PRIVATE -Wdeclaration-after-statement)
 add_test(
     NAME test_mpmc_ring_queue
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue
+    COMMAND $<TARGET_FILE:test_mpmc_ring_queue>
 )
 
 add_executable(test_mpmc_ring_queue_scale mpmc_ring_queue_scale_test.c ${REQUIRED_SOURCES})
@@ -35,42 +34,42 @@ target_link_libraries(test_mpmc_ring_queue_scale ${TEST_LIBRARIES})
 target_compile_options(test_mpmc_ring_queue_scale PRIVATE -Wdeclaration-after-statement)
 add_test(
     NAME test_mpmc_ring_queue_scale
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_mpmc_ring_queue_scale
+    COMMAND $<TARGET_FILE:test_mpmc_ring_queue_scale>
 )
 
 add_executable(test_queuedef queuedef_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_queuedef ${TEST_LIBRARIES})
 add_test(
     NAME test_queuedef
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_queuedef
+    COMMAND $<TARGET_FILE:test_queuedef>
 )
 
 add_executable(test_spinlock spinlock_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_spinlock ${TEST_LIBRARIES})
 add_test(
     NAME test_spinlock
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock
+    COMMAND $<TARGET_FILE:test_spinlock>
 )
 
 add_executable(test_spinlock_scale spinlock_scale_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_spinlock_scale ${TEST_LIBRARIES})
 add_test(
     NAME test_spinlock_scale
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
+    COMMAND $<TARGET_FILE:test_spinlock_scale>
 )
 
 add_executable(test_spinlock_long spinlock_long_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_spinlock_long ${TEST_LIBRARIES})
 add_test(
     NAME test_spinlock_long
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_spinlock_scale
+    COMMAND $<TARGET_FILE:test_spinlock_scale>
 )
 
 add_executable(test_barrier barrier_test.c ${REQUIRED_SOURCES})
 target_link_libraries(test_barrier ${TEST_LIBRARIES})
 add_test(
     NAME test_barrier
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_barrier
+    COMMAND $<TARGET_FILE:test_barrier>
 )
 
 if(HAVE_PTHREAD_SPIN)

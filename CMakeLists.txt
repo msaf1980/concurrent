@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 
 option(BUILD_TEST "Build tests" ON)
 option(PROFILE "Profile with google perftools" OFF)
@@ -14,6 +14,8 @@ foreach(cmakeFile ${cmakeFiles})
     message("INCLUDE ${cmakeFile}")
     include(${cmakeFile})
 endforeach(cmakeFile)
+
+set_version(0 0 1)
 
 include_directories (include)
 

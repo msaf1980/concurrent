@@ -1,4 +1,8 @@
-set(allowedBuildTypes Debug ASanDebug TSanDebug  Coverage Release ASan TSan RelWithDebInfo MinSizeRel)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Plain")
+endif()        
+
+set(allowedBuildTypes Plain Debug ASanDebug TSanDebug Release ASan TSan RelWithDebInfo MinSizeRel)
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${allowedBuildTypes}")
 
 if(CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE IN_LIST allowedBuildTypes)
