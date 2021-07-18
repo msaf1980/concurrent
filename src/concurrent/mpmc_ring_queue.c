@@ -62,8 +62,10 @@ mpmc_ring_queue *mpmc_ring_queue_new(size_t q_size, qerr_t *qerr) {
 } /* mpmc_ring_queue_new */
 
 qerr_t mpmc_ring_queue_destroy(mpmc_ring_queue *q) {
-    free((void *) q->msgs);
-    q->msgs = NULL;
+    if (q) {
+        free((void *) q->msgs);
+        q->msgs = NULL;
+    }
     free(q);
 
     return QERR_OK;
