@@ -26,7 +26,6 @@ CTEST(mpmc_ring_queue_new, bad_size) {
     qerr_t qerr;
     q = mpmc_ring_queue_new(0, &qerr);
     ASSERT_EQUAL_D(QERR_BADSIZE, qerr, "size 0 must errored with QERR_BADSIZE");
-    q = mpmc_ring_queue_new(1, &qerr);
     ASSERT_EQUAL_D(QERR_BADSIZE, qerr, "size 1 must errored with QERR_BADSIZE");
     q = mpmc_ring_queue_new(3, &qerr);
     ASSERT_EQUAL_D(QERR_BADSIZE, qerr, "size 3 must errored with QERR_BADSIZE");
@@ -37,6 +36,7 @@ CTEST(mpmc_ring_queue_new, bad_size) {
     q = mpmc_ring_queue_new(7, &qerr);
     ASSERT_EQUAL_D(QERR_BADSIZE, qerr, "size 7 must errored with QERR_BADSIZE");
     ASSERT_NULL(q);
+    mpmc_ring_queue_destroy(q);
 } /* CTEST(queue_new, bad_size) */
 
 CTEST(mpmc_ring_queue_base, enqueue_dequeue) {
@@ -297,6 +297,9 @@ CTEST(mpmc_ring_queue_size_max, overflow_dequeue) {
     ASSERT_EQUAL_D(0, mpmc_ring_queue_full(q_pos.q), "queue_is_full");
     ASSERT_EQUAL_U(mpmc_ring_queue_size(q_pos.q),
                    mpmc_ring_queue_freesizesize_relaxed(q_pos.q));
+
+
+    mpmc_ring_queue_destroy(q_pos.q);
 }
 
 typedef struct {
@@ -461,6 +464,9 @@ void mpmc_ring_queue_enqueue_dequeue(size_t q_size, size_t loops,
            ((double) end - (double) start) / 1000,
            (unsigned long) test_data.loops,
            (unsigned long long) (end - start) * 1000 / test_data.loops);
+
+    free(deq_t_handles);
+    free(enq_t_handles);
 }
 
 CTEST(mpmc_ring_queue_thread, enqueue_dequeue) {

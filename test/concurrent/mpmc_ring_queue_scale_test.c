@@ -83,6 +83,7 @@ void* run_function(void* param)
         if(action < 5) {
             p = mpmc_ring_queue_dequeue(q);
             if(p != NULL) {
+                free(p);
                 ++my_data->pop_count;
                 my_data->dummy = do_some_work((intptr_t) i);
             } else {
@@ -94,6 +95,7 @@ void* run_function(void* param)
             if (mpmc_ring_queue_enqueue(q, p) == QERR_OK) {
                 ++my_data->push_count;
             } else {
+                free(p);
                 ++my_data->attempt_count;
             }
         }
@@ -135,7 +137,7 @@ int main(int argc, char* argv[])
     }
     gettimeofday(&end, NULL);
 
-    mpmc_ring_queue_destroy(q);
+    mpmc_ring_queue_delete(q, free);
     for(i = 0; i < NUM_THREADS; ++i) {
         printf("thread %d - push: %lld pop: %lld attempt: %lld empty: %lld\n", 
             (int)i, data[i].push_count, data[i].pop_count, data[i].attempt_count, data[i].empty_count);

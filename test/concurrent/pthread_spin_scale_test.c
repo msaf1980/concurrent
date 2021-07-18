@@ -97,6 +97,9 @@ void pspinlock_lock_test(size_t loops, unsigned workers) {
            ((double) end - (double) start) / 1000,
            (unsigned long) test_data.loops,
            (unsigned long long) (end - start) * 1000 / test_data.loops);
+
+    free(t_handles);
+    pthread_spin_destroy(&test_data.pspinlock);
 }
 
 CTEST(pspinlock, lock) {
