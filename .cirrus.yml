@@ -23,16 +23,6 @@ task:
           - image: ubuntu:20.04
           - image: ubuntu:16.04
           - image: ubuntu:18.04
-    - name: Build (gcc, Release, ASAN)
-      install_dependencies_script:
-        - apt-get update
-        - apt-get install -y cmake gcc g++
-      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
-      container:
-        matrix:
-          - image: ubuntu:20.04
-          - image: ubuntu:16.04
-          - image: ubuntu:18.04
     - name: Build (gcc, Debug, ASAN)
       install_dependencies_script:
         - apt-get update
@@ -43,21 +33,31 @@ task:
           - image: ubuntu:20.04
           - image: ubuntu:16.04
           - image: ubuntu:18.04
-    - name: Build (gcc, Release, TSAN)
-      install_dependencies_script:
-        - apt-get update
-        - apt-get install -y cmake gcc g++
-      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
-      container:
-        matrix:
-          - image: ubuntu:20.04
-          - image: ubuntu:16.04
-          - image: ubuntu:18.04
     - name: Build (gcc, Debug, TSAN)
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
       script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
+      container:
+        matrix:
+          - image: ubuntu:20.04
+          - image: ubuntu:16.04
+          - image: ubuntu:18.04
+    - name: Build (gcc, Release, ASAN)
+      install_dependencies_script:
+        - apt-get update
+        - apt-get install -y cmake gcc g++
+      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
+      container:
+        matrix:
+          - image: ubuntu:20.04
+          - image: ubuntu:16.04
+          - image: ubuntu:18.04
+    - name: Build (gcc, Release, TSAN)
+      install_dependencies_script:
+        - apt-get update
+        - apt-get install -y cmake gcc g++
+      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
       container:
         matrix:
           - image: ubuntu:20.04
