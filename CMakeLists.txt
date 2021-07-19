@@ -15,16 +15,13 @@ foreach(cmakeFile ${cmakeFiles})
     include(${cmakeFile})
 endforeach(cmakeFile)
 
-set_version(0 0 1)
+if (BUILD_TEST)
+    include(CTest)
+endif()
 
 include_directories (include)
 
-add_subdirectory (src/concurrent)
-add_subdirectory (doc)
-
-if (BUILD_TEST)
-    include(CTest)
-    add_subdirectory(test/concurrent)
-endif() # END TEST
+include(detect.cmake)
+include(add.cmake)
 
 include(${CMAKE_SOURCE_DIR}/options_print.cmake)

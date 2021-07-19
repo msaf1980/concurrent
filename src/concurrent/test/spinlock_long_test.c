@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 #include <pthread.h>
-#if !HAVE_PTHREAD_BARRIER
+#if NO_PTHREAD_BARRIER
 #include "pthread_barrier.h"
 #endif
 
@@ -29,27 +29,27 @@
 typedef struct {
     char padding1[CACHE_LINE_SIZE - sizeof(int)];
     size_t cnt;
-    pthread_spinlock_t pspinlock;
+    spinlock_t spinlock;
     size_t loops;
     int verify; /* disable check order (for multithread testing) */
     pthread_barrier_t barrier;
 } tst_t;
 
-static void *pspinlock_lock_thread(void *in_arg) {
+static void *spinlock_lock_thread(void *in_arg) {
     tst_t *test_data = (tst_t *) in_arg;
-    pthread_spinlock_t *spinlock = &test_data->pspinlock;
+    char *spinlock = &test_data->spinlock;
     pthread_barrier_wait(&test_data->barrier);
     while (__sync_fetch_and_add(&test_data->cnt, 1) < test_data->loops) {
-        pthread_spin_lock(spinlock);
+        spinlock_lock(spinlock);
         usleep(1);
-        pthread_spin_unlock(spinlock);
+        spinlock_unlock(spinlock);
     } /* while */
 
     pthread_exit(NULL);
     return NULL; /* don't need this, but keep the compiler happy */
 }
 
-void pspinlock_lock_test(size_t loops, unsigned workers) {
+void spinlock_lock_test(size_t loops, unsigned workers) {
     /* Prepare for threading tests */
     int perr;
     uint64_t start, end;
@@ -63,7 +63,7 @@ void pspinlock_lock_test(size_t loops, unsigned workers) {
     t_handles = malloc(sizeof(pthread_t) * workers);
     ASSERT_TRUE(t_handles != NULL);
 
-    pthread_spin_init(&test_data.pspinlock, 0);
+    spinlock_init(&test_data.spinlock);
 
     test_data.loops = loops;
     test_data.cnt = 0;
@@ -77,7 +77,7 @@ void pspinlock_lock_test(size_t loops, unsigned workers) {
     pthread_attr_setdetachstate(&thr_attr, PTHREAD_CREATE_JOINABLE);
 
     for (i = 0; i < workers; i++) {
-        perr = pthread_create(&t_handles[i], &thr_attr, pspinlock_lock_thread,
+        perr = pthread_create(&t_handles[i], &thr_attr, spinlock_lock_thread,
                               &test_data);
         ASSERT_EQUAL_D(0, perr, "thread create");
     }
@@ -107,24 +107,24 @@ void pspinlock_lock_test(size_t loops, unsigned workers) {
     free(t_handles);
 }
 
-CTEST(pspinlock, lock) {
-    pspinlock_lock_test(LOOP_COUNT, 1);
+CTEST(spinlock, lock) {
+    spinlock_lock_test(LOOP_COUNT, 1);
 }
 
-CTEST(pspinlock, lock4) {
-    pspinlock_lock_test(LOOP_COUNT, 4);
+CTEST(spinlock, lock4) {
+    spinlock_lock_test(LOOP_COUNT, 4);
 }
 
-CTEST(pspinlock, lock8) {
-    pspinlock_lock_test(LOOP_COUNT, 8);
+CTEST(spinlock, lock8) {
+    spinlock_lock_test(LOOP_COUNT, 8);
 }
 
-CTEST(pspinlock, lock16) {
-    pspinlock_lock_test(LOOP_COUNT, 16);
+CTEST(spinlock, lock16) {
+    spinlock_lock_test(LOOP_COUNT, 16);
 }
 
-CTEST(pspinlock, lock64) {
-    pspinlock_lock_test(LOOP_COUNT, 64);
+CTEST(spinlock, lock64) {
+    spinlock_lock_test(LOOP_COUNT, 64);
 }
 
 int main(int argc, const char *argv[]) {

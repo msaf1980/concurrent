@@ -21,7 +21,7 @@
 #include <sys/time.h>
 
 #include <pthread.h>
-#if !HAVE_PTHREAD_BARRIER
+#if NO_PTHREAD_BARRIER
 #include "pthread_barrier.h"
 #endif
 

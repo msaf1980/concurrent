@@ -15,3 +15,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 add_library(concurrent_static STATIC ${CONCURRENT_SOURCES})
 set_target_properties(concurrent_static PROPERTIES OUTPUT_NAME concurrent)
+
+if (BUILD_TEST)
+    add_subdirectory(test)
+endif() # END TEST

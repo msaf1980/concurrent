@@ -1,3 +1,6 @@
+/*
+ * For check CPU usage on long operations
+ */
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +9,7 @@
 #include <unistd.h>
 
 #include <pthread.h>
-#if !HAVE_PTHREAD_BARRIER
+#if NO_PTHREAD_BARRIER
 #include "pthread_barrier.h"
 #endif
 
@@ -18,32 +21,35 @@
 
 #include "ctest.h"
 
+#define LOOP_COUNT 10000
+
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
 
 typedef struct {
     char padding1[CACHE_LINE_SIZE - sizeof(int)];
     size_t cnt;
-    pthread_mutex_t pmutex;
+    pthread_spinlock_t pspinlock;
     size_t loops;
     int verify; /* disable check order (for multithread testing) */
     pthread_barrier_t barrier;
 } tst_t;
 
-static void *pmutex_lock_thread(void *in_arg) {
+static void *pspinlock_lock_thread(void *in_arg) {
     tst_t *test_data = (tst_t *) in_arg;
-    pthread_mutex_t *lock = &test_data->pmutex;
+    pthread_spinlock_t *spinlock = &test_data->pspinlock;
     pthread_barrier_wait(&test_data->barrier);
     while (__sync_fetch_and_add(&test_data->cnt, 1) < test_data->loops) {
-        pthread_mutex_lock(lock);
-        pthread_mutex_unlock(lock);
+        pthread_spin_lock(spinlock);
+        usleep(1);
+        pthread_spin_unlock(spinlock);
     } /* while */
 
     pthread_exit(NULL);
     return NULL; /* don't need this, but keep the compiler happy */
 }
 
-void pmutex_lock_test(size_t loops, unsigned workers) {
+void pspinlock_lock_test(size_t loops, unsigned workers) {
     /* Prepare for threading tests */
     int perr;
     uint64_t start, end;
@@ -56,8 +62,8 @@ void pmutex_lock_test(size_t loops, unsigned workers) {
 
     t_handles = malloc(sizeof(pthread_t) * workers);
     ASSERT_TRUE(t_handles != NULL);
-    
-    pthread_mutex_init(&test_data.pmutex, NULL);
+
+    pthread_spin_init(&test_data.pspinlock, 0);
 
     test_data.loops = loops;
     test_data.cnt = 0;
@@ -71,7 +77,7 @@ void pmutex_lock_test(size_t loops, unsigned workers) {
     pthread_attr_setdetachstate(&thr_attr, PTHREAD_CREATE_JOINABLE);
 
     for (i = 0; i < workers; i++) {
-        perr = pthread_create(&t_handles[i], &thr_attr, pmutex_lock_thread,
+        perr = pthread_create(&t_handles[i], &thr_attr, pspinlock_lock_thread,
                               &test_data);
         ASSERT_EQUAL_D(0, perr, "thread create");
     }
@@ -98,28 +104,27 @@ void pmutex_lock_test(size_t loops, unsigned workers) {
            (unsigned long) test_data.loops,
            (unsigned long long) (end - start) * 1000 / test_data.loops);
 
-    pthread_mutex_init(&test_data.pmutex, NULL);
     free(t_handles);
 }
 
-CTEST(pmutex, lock) {
-    pmutex_lock_test(10000000, 1);
+CTEST(pspinlock, lock) {
+    pspinlock_lock_test(LOOP_COUNT, 1);
 }
 
-CTEST(pmutex, lock4) {
-    pmutex_lock_test(10000000, 4);
+CTEST(pspinlock, lock4) {
+    pspinlock_lock_test(LOOP_COUNT, 4);
 }
 
-CTEST(pmutex, lock8) {
-    pmutex_lock_test(10000000, 8);
+CTEST(pspinlock, lock8) {
+    pspinlock_lock_test(LOOP_COUNT, 8);
 }
 
-CTEST(pmutex, lock16) {
-    pmutex_lock_test(10000000, 16);
+CTEST(pspinlock, lock16) {
+    pspinlock_lock_test(LOOP_COUNT, 16);
 }
 
-CTEST(pmutex, lock64) {
-    pmutex_lock_test(10000000, 64);
+CTEST(pspinlock, lock64) {
+    pspinlock_lock_test(LOOP_COUNT, 64);
 }
 
 int main(int argc, const char *argv[]) {

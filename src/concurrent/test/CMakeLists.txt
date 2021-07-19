@@ -1,22 +1,13 @@
 # Scan source dir for standart source files and exclude main.cpp
 
-include_directories(../../include ../../src ..)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 set(REQUIRED_SOURCES)
 
-include(CheckFunctionExists)
-set(CMAKE_REQUIRED_LIBRARIES Threads::Threads)
-check_function_exists(pthread_barrier_init HAVE_PTHREAD_BARRIER)
-if(HAVE_PTHREAD_BARRIER)
-    ADD_DEFINITIONS(-DHAVE_PTHREAD_BARRIER=1)   
-else()
-    list(APPEND REQUIRED_SOURCES ../pthread_barrier.c)
-    ADD_DEFINITIONS(-DHAVE_PTHREAD_BARRIER=0)
+if(NOT HAVE_PTHREAD_BARRIER)
+    add_definitions(-DNO_PTHREAD_BARRIER=1)
+    list(APPEND REQUIRED_SOURCES ${PROJECT_SOURCE_DIR}/src/pthread_barrier.c)
 endif()
-check_function_exists(pthread_spin_init HAVE_PTHREAD_SPIN)
 
 set(TEST_LIBRARIES concurrent_static Threads::Threads)
 

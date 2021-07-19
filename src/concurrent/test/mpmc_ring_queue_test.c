@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #include <pthread.h>
-#if !HAVE_PTHREAD_BARRIER
+#ifdef NO_PTHREAD_BARRIER
 #include "pthread_barrier.h"
 #endif
 
