@@ -53,7 +53,7 @@ task:
           - image: ubuntu:20.04
           - image: ubuntu:16.04
           - image: ubuntu:18.04
-    - name: Build on Ubuntu (gcc, Debug, TSAN)
+    - name: Build (gcc, Debug, TSAN)
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
