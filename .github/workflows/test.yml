@@ -45,11 +45,11 @@ jobs:
       run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Release
     - name: Build (Debug)
       run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
-    - name: Build (Release) (ASAN)
-      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
     - name: Build (Debug, ASAN)
       run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug
-    - name: Build (Release) (TSAN)
-      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
+    - name: Build (Release) (ASAN)
+      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
     - name: Build (Debug, TSAN)
-      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
+      run: LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
+    - name: Build (Release) (TSAN)
+      run: LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan

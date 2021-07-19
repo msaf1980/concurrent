@@ -10,6 +10,7 @@ include (CheckSymbolExists)
 project (libconcurrent)
 
 file(GLOB cmakeFiles cmake/*.cmake)
+list(SORT cmakeFiles)
 foreach(cmakeFile ${cmakeFiles})
     message("INCLUDE ${cmakeFile}")
     include(${cmakeFile})
