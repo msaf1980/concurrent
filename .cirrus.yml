@@ -78,7 +78,7 @@ task:
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
-      script: LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
+      script: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
       container:
         matrix:
           - image: ubuntu:20.04
@@ -99,7 +99,7 @@ task:
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
-      script: LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
+      script: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
       container:
         matrix:
           - image: ubuntu:20.04
