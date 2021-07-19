@@ -74,11 +74,11 @@ task:
           - image: ubuntu:16.04
           - image: ubuntu:18.04
     - name: Build (gcc, Debug, TSAN)
-      only_if: $CIRRUS_BRANCH == 'master' || $CIRRUS_TAG != '' || $CIRRUS_PR != ''
+      #only_if: $CIRRUS_BRANCH == 'master' || $CIRRUS_TAG != '' || $CIRRUS_PR != ''
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
-      script: TIMEOUT=3600 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
+      script: LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
       container:
         matrix:
           - image: ubuntu:20.04
@@ -95,11 +95,11 @@ task:
           - image: ubuntu:16.04
           - image: ubuntu:18.04
     - name: Build (gcc, Release, TSAN)
-      only_if: $CIRRUS_BRANCH == 'master' || $CIRRUS_TAG != '' || $CIRRUS_PR != ''
+      # only_if: $CIRRUS_BRANCH == 'master' || $CIRRUS_TAG != '' || $CIRRUS_PR != ''
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
-      script: TIMEOUT=3600 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
+      script: LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
       container:
         matrix:
           - image: ubuntu:20.04
