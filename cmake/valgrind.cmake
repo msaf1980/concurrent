@@ -1,21 +1,25 @@
 # For run tests under valgrind:
-# ctest  -D ExperimentalMemCheck
-# or (if configured with make backend)
-# run target test-valgrind
+# ctest -T memcheck
+# or run target test_memcheck
+# cmake --build . -v --target test_memcheck
+# or run target test_memcheck with comfigured backend
+# make test_memcheck
+# or
+# ninja test_memcheck
 if (ENABLE_VALGRIND)
     find_program(MEMORYCHECK_COMMAND valgrind)
-    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --track-origins=yes --show-reachable=yes --error-exitcode=255" )
-    set(MEMORYCHECK_SUPPRESSIONS_FILE "${PROJECT_SOURCE_DIR}/valgrind_suppress.txt" )
-    # set(DART_CONFIG DartConfiguration.tcl)
-    # add_custom_target(${DART_CONFIG}
-    #     COMMAND echo "MemoryCheckCommand: ${MEMORYCHECK_COMMAND}" >> ${DART_CONFIG}
-    #     COMMENT "Generating ${DART_CONFIG}"
-    # )    
-    set(LOGFILE memcheck.log)
+    set(MEMORYCHECK_SUPPRESS "${PROJECT_SOURCE_DIR}/valgrind_suppress.txt" )
+    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --track-origins=yes --show-reachable=yes --error-exitcode=255 --suppressions=${MEMORYCHECK_SUPPRESS}" )
+    set(MEMCHECK_LOGFILE memcheck.log)
     add_custom_target(test-valgrind
-        COMMAND ctest -O ${LOGFILE} -D ExperimentalMemCheck
-        COMMAND tail -n1 ${LOGFILE} | grep 'Memory checking results:' > /dev/null
-        COMMAND rm -f ${LOGFILE}
+        COMMAND ctest -O ${MEMCHECK_LOGFILE} -t memcheck
+        COMMAND tail -n1 ${MEMCHECK_LOGFILE} | grep 'Memory checking results:' > /dev/null
+        COMMAND rm -f ${MEMCHECK_LOGFILE}
         DEPENDS ${DART_CONFIG}
+    )
+    add_custom_target(test_memcheck
+        COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process -O ${MEMCHECK_LOGFILE} --test-action memcheck
+        COMMAND cat ${MEMCHECK_LOGFILE}
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 endif()
