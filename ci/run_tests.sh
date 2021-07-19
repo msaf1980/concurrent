@@ -1,20 +1,24 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
+CMAKE=${CMAKE:-cmake}
+CTEST=${CTEST:-ctest}
+VALGRIND=${VALGRIND:-0}
+
 if [ -d _build_ci ] ; then
-        rm -rf _build_ci
+    rm -rf _build_ci || exit 1
 fi
-mkdir _build_ci
+mkdir _build_ci || exit 1
 
-pushd _build_ci
+cd _build_ci || exit 1
 
-
-cmake -DCMAKE_BUILD_TYPE=Release ..
+${CMAKE} $@ ..
 echo "======================================"
 echo "                Build"
 echo "======================================"
-cmake --build .
+${CMAKE} --build . || exit 1
+#${CMAKE} --build . --target examples || exit 1
 
 make
 
@@ -23,8 +27,20 @@ echo "         Running unit tests"
 echo "======================================"
 echo
 
-ctest -V
-
-popd
-
-echo "Test run has finished successfully"
+if [ "${VALGRIND}" == "1" ]; then
+    if ${CTEST} -T memcheck -V ; then
+        echo "Test run under valgrind has finished successfully"
+        cd ..
+    else
+        echo "Test run under valgrind failed" >&2
+        exit 1
+    fi
+else
+    if ${CTEST} -V ; then
+        echo "Test run has finished successfully"
+        cd ..
+    else
+        echo "Test run failed" >&2
+        exit 1
+    fi
+fi
