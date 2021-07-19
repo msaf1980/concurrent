@@ -111,6 +111,14 @@ int main()
     struct timeval begin, end;
     double us;
 
+    char *COUNT_STR = getenv("LOOP_COUNT");
+    if (COUNT_STR) {
+        unsigned long c = strtoul(COUNT_STR, NULL, 10);
+        if (c > 0) {
+            PER_THREAD_COUNT = c;
+        }
+    }
+
     data = calloc(NUM_THREADS, sizeof(*data));
     pthread_barrier_init(&barrier, NULL, (unsigned int) NUM_THREADS);
 

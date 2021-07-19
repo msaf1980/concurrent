@@ -21,10 +21,10 @@
 
 #include "ctest.h"
 
-#define LOOP_COUNT 10000
-
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
+
+size_t LOOP_COUNT = 10000000;
 
 typedef struct {
     char padding1[CACHE_LINE_SIZE - sizeof(int)];
@@ -128,5 +128,13 @@ CTEST(spinlock, lock64) {
 }
 
 int main(int argc, const char *argv[]) {
+    char *COUNT_STR = getenv("LOOP_COUNT");
+    if (COUNT_STR) {
+        unsigned long c = strtoul(COUNT_STR, NULL, 10);
+        if (c > 0) {
+            LOOP_COUNT = c;
+        }
+    }
+
     return ctest_main(argc, argv);
 } /* main */

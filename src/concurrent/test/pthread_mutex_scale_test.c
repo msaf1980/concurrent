@@ -21,6 +21,8 @@
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
 
+size_t LOOP_COUNT = 10000000;
+
 typedef struct {
     char padding1[CACHE_LINE_SIZE - sizeof(int)];
     size_t cnt;
@@ -103,25 +105,33 @@ void pmutex_lock_test(size_t loops, unsigned workers) {
 }
 
 CTEST(pmutex, lock) {
-    pmutex_lock_test(10000000, 1);
+    pmutex_lock_test(LOOP_COUNT, 1);
 }
 
 CTEST(pmutex, lock4) {
-    pmutex_lock_test(10000000, 4);
+    pmutex_lock_test(LOOP_COUNT, 4);
 }
 
 CTEST(pmutex, lock8) {
-    pmutex_lock_test(10000000, 8);
+    pmutex_lock_test(LOOP_COUNT, 8);
 }
 
 CTEST(pmutex, lock16) {
-    pmutex_lock_test(10000000, 16);
+    pmutex_lock_test(LOOP_COUNT, 16);
 }
 
 CTEST(pmutex, lock64) {
-    pmutex_lock_test(10000000, 64);
+    pmutex_lock_test(LOOP_COUNT, 64);
 }
 
 int main(int argc, const char *argv[]) {
+    char *COUNT_STR = getenv("LOOP_COUNT");
+    if (COUNT_STR) {
+        unsigned long c = strtoul(COUNT_STR, NULL, 10);
+        if (c > 0) {
+            LOOP_COUNT = c;
+        }
+    }
+
     return ctest_main(argc, argv);
 } /* main */

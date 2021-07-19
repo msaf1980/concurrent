@@ -18,6 +18,8 @@
 
 #include "ctest.h"
 
+size_t LOOP_COUNT = 10000000;
+
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
 
@@ -470,25 +472,33 @@ void mpmc_ring_queue_enqueue_dequeue(size_t q_size, size_t loops,
 }
 
 CTEST(mpmc_ring_queue_thread, enqueue_dequeue) {
-    mpmc_ring_queue_enqueue_dequeue(4096, 10000000, 1, 1, 0);
+    mpmc_ring_queue_enqueue_dequeue(4096, LOOP_COUNT, 1, 1, 0);
 }
 
 CTEST(mpmc_ring_queue_thread, enqueue4_dequeue4) {
-    mpmc_ring_queue_enqueue_dequeue(32, 10000000, 4, 4, 0);
+    mpmc_ring_queue_enqueue_dequeue(32, LOOP_COUNT, 4, 4, 0);
 }
 
 CTEST(mpmc_ring_queue_thread, enqueue6_dequeue4) {
-    mpmc_ring_queue_enqueue_dequeue(32, 10000000, 6, 6, 0);
+    mpmc_ring_queue_enqueue_dequeue(32, LOOP_COUNT, 6, 6, 0);
 }
 
 CTEST(mpmc_ring_queue_thread, enqueue4_dequeue6) {
-    mpmc_ring_queue_enqueue_dequeue(32, 10000000, 4, 6, 0);
+    mpmc_ring_queue_enqueue_dequeue(32, LOOP_COUNT, 4, 6, 0);
 }
 
 CTEST(mpmc_ring_queue_thread, enqueue6_dequeue6) {
-    mpmc_ring_queue_enqueue_dequeue(32, 10000000, 6, 6, 0);
+    mpmc_ring_queue_enqueue_dequeue(32, LOOP_COUNT, 6, 6, 0);
 }
 
 int main(int argc, const char *argv[]) {
+    char *COUNT_STR = getenv("LOOP_COUNT");
+    if (COUNT_STR) {
+        unsigned long c = strtoul(COUNT_STR, NULL, 10);
+        if (c > 0) {
+            LOOP_COUNT = c;
+        }
+    }
+
     return ctest_main(argc, argv);
 } /* main */

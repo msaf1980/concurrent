@@ -22,6 +22,8 @@
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
 
+size_t LOOP_COUNT = 10000000;
+
 typedef struct {
     char padding1[CACHE_LINE_SIZE - sizeof(int)];
     size_t enq_sum;
@@ -172,25 +174,33 @@ void queue_enqueue_dequeue(size_t q_size, size_t loops, unsigned writers,
 }
 
 CTEST(queue_thread, enqueue_dequeue) {
-    queue_enqueue_dequeue(4096, 10000000, 1, 1, 0);
+    queue_enqueue_dequeue(4096, LOOP_COUNT, 1, 1, 0);
 }
 
 CTEST(queue_thread, enqueue4_dequeue4) {
-    queue_enqueue_dequeue(32, 10000000, 4, 4, 0);
+    queue_enqueue_dequeue(32, LOOP_COUNT, 4, 4, 0);
 }
 
 CTEST(queue_thread, enqueue6_dequeue4) {
-    queue_enqueue_dequeue(32, 10000000, 6, 6, 0);
+    queue_enqueue_dequeue(32, LOOP_COUNT, 6, 6, 0);
 }
 
 CTEST(queue_thread, enqueue4_dequeue6) {
-    queue_enqueue_dequeue(32, 10000000, 4, 6, 0);
+    queue_enqueue_dequeue(32, LOOP_COUNT, 4, 6, 0);
 }
 
 CTEST(queue_thread, enqueue6_dequeue6) {
-    queue_enqueue_dequeue(32, 10000000, 6, 6, 0);
+    queue_enqueue_dequeue(32, LOOP_COUNT, 6, 6, 0);
 }
 
 int main(int argc, const char *argv[]) {
+    char *COUNT_STR = getenv("LOOP_COUNT");
+    if (COUNT_STR) {
+        unsigned long c = strtoul(COUNT_STR, NULL, 10);
+        if (c > 0) {
+            LOOP_COUNT = c;
+        }
+    }
+
     return ctest_main(argc, argv);
 } /* main */

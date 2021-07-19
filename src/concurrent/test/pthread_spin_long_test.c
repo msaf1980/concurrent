@@ -21,7 +21,7 @@
 
 #include "ctest.h"
 
-#define LOOP_COUNT 10000
+size_t LOOP_COUNT = 10000000;
 
 #define V2I (size_t)(void *)
 #define I2V (void *) (size_t)
@@ -128,5 +128,13 @@ CTEST(pspinlock, lock64) {
 }
 
 int main(int argc, const char *argv[]) {
+    char *COUNT_STR = getenv("LOOP_COUNT");
+    if (COUNT_STR) {
+        unsigned long c = strtoul(COUNT_STR, NULL, 10);
+        if (c > 0) {
+            LOOP_COUNT = c;
+        }
+    }
+
     return ctest_main(argc, argv);
 } /* main */
