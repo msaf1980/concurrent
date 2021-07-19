@@ -27,7 +27,7 @@
 
 size_t NUM_THREADS = 4;
 size_t PER_THREAD_COUNT = 100000000;
-int WORK_FACTOR = 0;
+int WORK_FACTOR = 4;
 pthread_barrier_t barrier;
 
 long long getusecs(struct timeval* tv)
@@ -103,7 +103,7 @@ void* run_function(void* param)
     return NULL;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     size_t i;
     thread_data_t total = { 0, 0, 0, 0, 0 };
@@ -111,15 +111,6 @@ int main(int argc, char* argv[])
     struct timeval begin, end;
     double us;
 
-    if(argc > 1) {
-        NUM_THREADS = (size_t) atoi(argv[1]);
-    }
-    if(argc > 2) {
-        PER_THREAD_COUNT = (size_t) atoi(argv[2]);
-    }
-    if(argc > 3) {
-        WORK_FACTOR = (size_t) atoi(argv[3]);
-    }
     data = calloc(NUM_THREADS, sizeof(*data));
     pthread_barrier_init(&barrier, NULL, (unsigned int) NUM_THREADS);
 

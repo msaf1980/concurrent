@@ -350,7 +350,7 @@ static void *deq_thread(void *in_arg) {
     while (msg_num < test_data->loops) {
         size_t m = (size_t) mpmc_ring_queue_dequeue(q);
         if (m) {
-            unsigned long get_pos = (unsigned long) q->get_pos;
+            unsigned long get_pos = (unsigned long) __atomic_load_n(&q->get_pos, __ATOMIC_RELAXED);
             // printf("DEQUEUE %lu AT %lu\n", (unsigned long) m, get_pos);
             msg_num = __sync_add_and_fetch(&test_data->deq_cnt, 1);
             __sync_fetch_and_add(&test_data->deq_sum, m);
