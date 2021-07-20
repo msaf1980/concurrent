@@ -7,6 +7,13 @@ include (CheckFunctionExists)
 include (CheckIncludeFiles)
 include (CheckSymbolExists)
 
+file(GLOB cmakeInitFiles cmake_init/*.cmake)
+list(SORT cmakeInitFiles)
+foreach(cmakeFile ${cmakeInitFiles})
+    message("INCLUDE INIT ${cmakeFile}")
+    include(${cmakeFile})
+endforeach(cmakeFile)
+
 project (libconcurrent)
 
 file(GLOB cmakeFiles cmake/*.cmake)
@@ -21,6 +28,10 @@ if (BUILD_TEST)
 endif()
 
 include_directories (include)
+
+if (COVERAGE)
+	append_coverage_compiler_flags()
+endif()
 
 include(detect.cmake)
 include(add.cmake)

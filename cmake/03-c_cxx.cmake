@@ -90,13 +90,6 @@ if(CMAKE_COMPILER_IS_GNU OR CMAKE_COMPILER_IS_CLANG)
 		set(ENABLE_VALGRIND OFF)
 	endif()
 	
-	# Coverage
-	if(COVERAGE)
-		append_flag(CMAKE_C_FLAGS_${BUILD_TYPE} "--coverage")
-		append_flag(CMAKE_CXX_FLAGS_${BUILD_TYPE} "--coverage")
-	    append_flag(CMAKE_EXE_LINKER_FLAGS_${BUILD_TYPE} "--coverage")
-	    append_flag(CMAKE_SHARED_LINKER_FLAGS_${BUILD_TYPE} "--coverage")
-	endif()
 	# Profile
 	if(PROFILE)
 		append_flag(CMAKE_C_FLAGS_${BUILD_TYPE} "-g")
