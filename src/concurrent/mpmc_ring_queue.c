@@ -158,7 +158,7 @@ int mpmc_ring_queue_full(mpmc_ring_queue *q) {
     return (seq != put_pos);
 }
 
-size_t mpmc_ring_queue_freesizesize_relaxed(mpmc_ring_queue *q) {
+size_t mpmc_ring_queue_freesize_relaxed(mpmc_ring_queue *q) {
     size_t get_pos, put_pos;
     put_pos = __atomic_load_n(&q->put_pos, __ATOMIC_RELAXED);
     get_pos = __atomic_load_n(&q->get_pos, __ATOMIC_ACQUIRE);
@@ -174,5 +174,5 @@ size_t mpmc_ring_queue_freesizesize_relaxed(mpmc_ring_queue *q) {
 }
 
 size_t mpmc_ring_queue_len_relaxed(mpmc_ring_queue *q) {
-    return mpmc_ring_queue_size(q) - mpmc_ring_queue_freesizesize_relaxed(q);
+    return mpmc_ring_queue_size(q) - mpmc_ring_queue_freesize_relaxed(q);
 }

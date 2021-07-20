@@ -96,7 +96,7 @@ size_t mpmc_ring_queue_size(mpmc_ring_queue *q);
  * @param q: Queue instance handle.
  * @retval queue free length
  */
-size_t mpmc_ring_queue_freesizesize_relaxed(mpmc_ring_queue *q);
+size_t mpmc_ring_queue_freesize_relaxed(mpmc_ring_queue *q);
 
 /**
  * @brief Get queue length (not full consistent).
