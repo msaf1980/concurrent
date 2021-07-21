@@ -11,7 +11,7 @@ if(BUILD_SHARED_LIBS)
         concurrent
         PROPERTIES OUTPUT_NAME concurrent
                    SOVERSION "${VERSION_MAJOR}"
-                   VERSION "${VERSION_STRING}")
+                   VERSION "${VERSION}")
 endif()
 add_library(concurrent_static STATIC ${CONCURRENT_SOURCES})
 set_target_properties(concurrent_static PROPERTIES OUTPUT_NAME concurrent)

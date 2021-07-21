@@ -8,6 +8,7 @@
 # ninja test_memcheck
 if (ENABLE_VALGRIND)
     find_program(MEMORYCHECK_COMMAND valgrind)
+    add_definitions(-DVALGRIND_ENABLED=1)
     set(MEMORYCHECK_SUPPRESS "${PROJECT_SOURCE_DIR}/valgrind_suppress.txt" )
     set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --track-origins=yes --show-reachable=yes --error-exitcode=255 --suppressions=${MEMORYCHECK_SUPPRESS}" )
     set(MEMCHECK_LOGFILE memcheck.log)
