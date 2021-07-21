@@ -9,7 +9,7 @@ if(NOT HAVE_PTHREAD_BARRIER)
     list(APPEND REQUIRED_SOURCES ${PROJECT_SOURCE_DIR}/src/pthread_barrier.c)
 endif()
 
-set(TEST_LIBRARIES concurrent_static Threads::Threads)
+set(TEST_LIBRARIES concurrent Threads::Threads)
 
 # Build tests
 add_executable(test_mpmc_ring_queue mpmc_ring_queue_test.c ${REQUIRED_SOURCES})

@@ -29,10 +29,6 @@ endif()
 
 include_directories (include)
 
-if (COVERAGE)
-	append_coverage_compiler_flags()
-endif()
-
 include(detect.cmake)
 include(add.cmake)
 
