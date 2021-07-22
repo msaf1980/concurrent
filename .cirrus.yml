@@ -67,7 +67,7 @@ task:
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
-      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug
+      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug -DENABLE_UBSAN=ON
       container:
         matrix:
           - image: ubuntu:20.04
@@ -88,7 +88,7 @@ task:
       install_dependencies_script:
         - apt-get update
         - apt-get install -y cmake gcc g++
-      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
+      script: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan -DENABLE_UBSAN=ON
       container:
         matrix:
           - image: ubuntu:20.04

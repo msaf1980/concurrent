@@ -46,10 +46,10 @@ jobs:
     - name: Build (Debug)
       run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=Debug
     - name: Build (Debug, ASAN)
-      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug
-    - name: Build (Release) (ASAN)
-      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan
+      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASanDebug -DENABLE_UBSAN=ON
     - name: Build (Debug, TSAN)
       run: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSanDebug
+    - name: Build (Release) (ASAN)
+      run: ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=ASan -DENABLE_UBSAN=ON
     - name: Build (Release) (TSAN)
       run: TIMEOUT=2400 LOOP_COUNT=1000000 ./ci/run_tests.sh -DCMAKE_BUILD_TYPE=TSan
