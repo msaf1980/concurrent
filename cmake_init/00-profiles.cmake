@@ -17,3 +17,20 @@ endif()
 if (COVERAGE)
     message(FATAL_ERROR "coverage not implemented")
 endif()
+
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+
+if(CMAKE_BUILD_TYPE MATCHES "ASan")
+    set(ENABLE_ASAN ON)
+endif()
+if(CMAKE_BUILD_TYPE MATCHES "TSan")
+    set(ENABLE_TSAN ON)
+endif()
+
+if (ENABLE_ASAN AND ENABLE_TSAN)
+    message(FATAL_ERROR "ASAN and TSAN can't be used together")
+endif()
+
+if(EXPORT_COMPILE)
+	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()

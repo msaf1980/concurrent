@@ -1,8 +1,8 @@
 option(PROFILE "Profile with google perftools" OFF)
-option(COVERAGE "Coverage" OFF)
+#option(COVERAGE "Coverage" OFF)
 option(ENABLE_VALGRIND "Tests under valgring (test-valgrind target)" ON)
+option(ENABLE_ASAN  "Enable ASAN" OFF)
+option(ENABLE_UBSAN "Enable UBSAN" OFF)
+option(ENABLE_TSAN  "Enable TSAN" OFF)
 option(EXPORT_COMPILE "Export compile database" OFF)
-
-if(EXPORT_COMPILE)
-	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-endif()
+option(BUILD_TEST "Build tests" ON)
