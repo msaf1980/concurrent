@@ -52,9 +52,11 @@ if(CMAKE_COMPILER_IS_GNU OR CMAKE_COMPILER_IS_CLANG)
 	if(CMAKE_BUILD_TYPE MATCHES "Debug")
 		# Disable optimimization
 		append_flag(CMAKE_C_FLAGS_${BUILD_TYPE} "-O0")
-		#append_flag(CMAKE_C_FLAGS_${BUILD_TYPE} "-fno-inline")
 		append_flag(CMAKE_CXX_FLAGS_${BUILD_TYPE} "-O0")
+		#append_flag(CMAKE_C_FLAGS_${BUILD_TYPE} "-fno-inline")
 		#append_flag(CMAKE_CXX_FLAGS_${BUILD_TYPE} "-fno-inline")
+		append_flag(CMAKE_C_FLAGS_${BUILD_TYPE} "-g")
+		append_flag(CMAKE_CXX_FLAGS_${BUILD_TYPE} "-g")
 		add_definitions(-DDEBUG)
 	endif()
 
