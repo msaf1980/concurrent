@@ -19,6 +19,7 @@ set_target_properties(concurrent PROPERTIES OUTPUT_NAME concurrent)
 include(GNUInstallDirs)
 install(TARGETS concurrent
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 # Install headers
