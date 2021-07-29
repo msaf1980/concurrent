@@ -1,6 +1,4 @@
-set(CONCURRENT_VERSION "0.0.1")
-
-set_version(CONCURRENT_VERSION CONCURRENT_VERSION_MAJOR CONCURRENT_VERSION_MINOR CONCURRENT_VERSION_PATCH CONCURRENT_VERSION_REVISION)
+set_version(PROJECT_VERSION CONCURRENT_VERSION_MAJOR CONCURRENT_VERSION_MINOR CONCURRENT_VERSION_PATCH CONCURRENT_VERSION_REVISION)
 
 set(
     CONCURRENT_SOURCES
@@ -14,7 +12,7 @@ if(BUILD_SHARED_LIBS)
     set_target_properties(concurrent_shared
         PROPERTIES OUTPUT_NAME concurrent
                    SOVERSION "${CONCURRENT_VERSION_MAJOR}"
-                   VERSION "${CONCURRENT_VERSION}"
+                   VERSION "${PROJECT_VERSION}"
     )
 endif()
 add_library(concurrent STATIC ${CONCURRENT_SOURCES})
@@ -30,6 +28,7 @@ install(TARGETS concurrent
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/concurrent"
         DESTINATION "include"
 )
+
 
 configure_file(${PROJECT_SOURCE_DIR}/libconcurrent.pc.in ${CMAKE_BINARY_DIR}/libconcurrent.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/libconcurrent.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)

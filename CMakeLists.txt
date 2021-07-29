@@ -12,6 +12,8 @@ foreach(cmakeFile ${cmakeInitFiles})
 endforeach(cmakeFile)
 
 project (libconcurrent)
+set(PROJECT_VERSION "0.0.1")
+set(PROJECT_DESRIPTION "concurrent data structuras and routines")
 
 file(GLOB cmakeFiles cmake/*.cmake)
 list(SORT cmakeFiles)
