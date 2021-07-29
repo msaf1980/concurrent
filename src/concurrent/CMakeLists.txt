@@ -1,3 +1,7 @@
+set(CONCURRENT_VERSION "0.0.1")
+
+set_version(CONCURRENT_VERSION CONCURRENT_VERSION_MAJOR CONCURRENT_VERSION_MINOR CONCURRENT_VERSION_PATCH CONCURRENT_VERSION_REVISION)
+
 set(
     CONCURRENT_SOURCES
     mpmc_ring_queue.c
@@ -9,8 +13,8 @@ if(BUILD_SHARED_LIBS)
     add_library(concurrent_shared SHARED ${CONCURRENT_SOURCES})
     set_target_properties(concurrent_shared
         PROPERTIES OUTPUT_NAME concurrent
-                   SOVERSION "${VERSION_MAJOR}"
-                   VERSION "${VERSION}"
+                   SOVERSION "${CONCURRENT_VERSION_MAJOR}"
+                   VERSION "${CONCURRENT_VERSION}"
     )
 endif()
 add_library(concurrent STATIC ${CONCURRENT_SOURCES})
