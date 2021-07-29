@@ -17,7 +17,10 @@ if(BUILD_SHARED_LIBS)
     )
 endif()
 add_library(concurrent STATIC ${CONCURRENT_SOURCES})
-set_target_properties(concurrent PROPERTIES OUTPUT_NAME concurrent)
+set_target_properties(concurrent
+    PROPERTIES OUTPUT_NAME concurrent
+               POSITION_INDEPENDENT_CODE ON    
+)
 
 include(GNUInstallDirs)
 install(TARGETS concurrent
