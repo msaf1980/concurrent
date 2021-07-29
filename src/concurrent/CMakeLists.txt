@@ -7,6 +7,9 @@ set(
     queuedef.c
 )
 
+
+include(GNUInstallDirs)
+
 add_library(concurrent STATIC ${CONCURRENT_SOURCES})
 set_target_properties(concurrent
     PROPERTIES OUTPUT_NAME concurrent
@@ -32,13 +35,10 @@ if(BUILD_SHARED_LIBS)
     )
 endif()
 
-include(GNUInstallDirs)
-
 # Install headers
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/concurrent"
         DESTINATION "include"
 )
-
 
 configure_file(${PROJECT_SOURCE_DIR}/libconcurrent.pc.in ${CMAKE_BINARY_DIR}/libconcurrent.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/libconcurrent.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
