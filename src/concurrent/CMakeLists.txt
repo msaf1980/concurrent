@@ -11,6 +11,7 @@ if(BUILD_SHARED_LIBS)
     add_library(concurrent_shared SHARED ${CONCURRENT_SOURCES})
     set_target_properties(concurrent_shared
         PROPERTIES OUTPUT_NAME concurrent
+                   POSITION_INDEPENDENT_CODE ON
                    SOVERSION "${CONCURRENT_VERSION_MAJOR}"
                    VERSION "${PROJECT_VERSION}"
     )
