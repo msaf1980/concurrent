@@ -7,6 +7,16 @@ set(
     queuedef.c
 )
 
+add_library(concurrent STATIC ${CONCURRENT_SOURCES})
+set_target_properties(concurrent
+    PROPERTIES OUTPUT_NAME concurrent
+               POSITION_INDEPENDENT_CODE ON    
+)
+install(TARGETS concurrent
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 if(BUILD_SHARED_LIBS)
     add_library(concurrent_shared SHARED ${CONCURRENT_SOURCES})
     set_target_properties(concurrent_shared
@@ -15,19 +25,15 @@ if(BUILD_SHARED_LIBS)
                    SOVERSION "${CONCURRENT_VERSION_MAJOR}"
                    VERSION "${PROJECT_VERSION}"
     )
+    install(TARGETS concurrent_shared
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 endif()
-add_library(concurrent STATIC ${CONCURRENT_SOURCES})
-set_target_properties(concurrent
-    PROPERTIES OUTPUT_NAME concurrent
-               POSITION_INDEPENDENT_CODE ON    
-)
 
 include(GNUInstallDirs)
-install(TARGETS concurrent
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+
 # Install headers
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/concurrent"
         DESTINATION "include"
