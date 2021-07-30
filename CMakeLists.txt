@@ -28,7 +28,7 @@ endif()
 
 include_directories (include)
 
-include(detect.cmake)
+include(deps.cmake)
 include(add.cmake)
 
 include(${CMAKE_SOURCE_DIR}/options_print.cmake)
