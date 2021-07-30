@@ -43,6 +43,6 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/concurrent"
 configure_file(${PROJECT_SOURCE_DIR}/libconcurrent.pc.in ${CMAKE_BINARY_DIR}/libconcurrent.pc @ONLY)
 install(FILES ${CMAKE_BINARY_DIR}/libconcurrent.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
-if (BUILD_TEST)
+if (BUILD_TESTING)
     add_subdirectory(test)
 endif() # END TEST

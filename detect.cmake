@@ -1,7 +1,7 @@
 include(CheckFunctionExists)
 include(CheckSymbolExists)
 
-if (BUILD_TEST)
+if (BUILD_TESTING)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED) # Threads::Threads
     set(CMAKE_REQUIRED_LIBRARIES Threads::Threads) # required libs for check_function_exists

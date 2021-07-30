@@ -22,7 +22,7 @@ foreach(cmakeFile ${cmakeFiles})
     include(${cmakeFile})
 endforeach(cmakeFile)
 
-if (BUILD_TEST)
+if (BUILD_TESTING)
     include(CTest)
 endif()
 
